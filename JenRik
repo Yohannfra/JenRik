@@ -17,7 +17,7 @@ function execute_test()
 {
     let "NB_TESTS=NB_TESTS+1"
     echo -ne $TEST_NAME"\t:\t"$BINARY_PATH $TEST_ARGS "\t: "
-    output=$($BINARY_PATH)
+    output=$($BINARY_PATH ${TEST_ARGS})
     status=$?
 
     if [[ $status -ne $TEST_STATUS ]]; then

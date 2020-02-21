@@ -9,7 +9,8 @@ TESTS_FAILS=0
 
 function print_usage()
 {
-    echo USAGE : $1 test_file1.jrk [test_file2.jrk] ...
+    echo "USAGE : $1 test_file1.jrk [test_file2.jrk] | init path_to_binary"
+    echo "\tinit\tcreate a basic test file for the given binary"
 }
 
 function execute_test()
@@ -83,11 +84,28 @@ function display_summary()
     echo -ne "$TESTS_FAILS\t:\t${RED}KO${RESET}\n"
 }
 
+function init_test_file()
+{
+    if [[ -f "$1.jrk" ]]; then
+        echo "$1.jrk already exists"
+        exit 1
+    fi
+    file="$1.jrk"
+    touch $file
+    echo -e "BINARY_PATH=$1\n" > $file
+    echo -e "# example test |args|exit_status|stdout|" >> $file
+    echo -e "sample test |-h|0||" >> $file
+}
+
 function main()
 {
     if [[ $# -lt 1 ]]; then
         print_usage $0
         exit 1
+    fi
+    if [[ $# -eq 2 ]] && [[ $1 = "init" ]]; then
+        init_test_file $2
+        exit 0
     fi
     for arg in "$@"; do
         if ! [[ -r $arg ]] || [[ $arg != *.jrk ]]; then

@@ -32,7 +32,7 @@ sudo ./install.sh
 
 Let's say we need to test this basic shell script.
 
-my_prog.sh : 
+my_prog.sh :
 ```bash
 #!/bin/bash
 
@@ -65,16 +65,23 @@ Lines that start with a "#" are commentaries, they are ignored.
 The commentaty here explains how to create a test:
 1. The name of the test
 2. The command line arguments for this test
-3. The expected exit status 
+3. The expected exit status
 4. The expected standart output
 
-The line 
+The line
 ```
 sample test |-h|0||
 ```
 Is an example test, it will start your program with '-h' as argument and expect it to exit 0.\
 As you can see the field of the standart output is empty. It means that you won't test test it.\
 You can also give an empty arguments field.
+
+Now delete the sample test line and add those two lines:
+```
+test 1 |1|0||
+test not 1 |2|1||
+```
+And... that's all, you can now go to the USAGE section to see how to run it.
 
 ## USAGE
 Once you have written the test file you just have to :

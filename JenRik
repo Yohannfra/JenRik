@@ -10,7 +10,7 @@ TESTS_FAILS=0
 function print_usage()
 {
     echo "USAGE : $1 test_file1.jrk [test_file2.jrk] | init path_to_binary"
-    echo "\tinit\tcreate a basic test file for the given binary"
+    echo -e "\tinit\tcreate a basic test file for the given binary"
 }
 
 function execute_test()
@@ -93,7 +93,7 @@ function init_test_file()
     file="$1.jrk"
     touch $file
     echo -e "BINARY_PATH=$1\n" > $file
-    echo -e "# example test |args|exit_status|stdout|" >> $file
+    echo -e "# test name |args|exit_status|stdout|" >> $file
     echo -e "sample test |-h|0||" >> $file
 }
 
@@ -103,7 +103,11 @@ function main()
         print_usage $0
         exit 1
     fi
-    if [[ $# -eq 2 ]] && [[ $1 = "init" ]]; then
+    if [[ $1 = "init" ]]; then
+        if [[  $# -ne 2 ]]; then
+            echo "You must provide the path to the binary"
+            exit 1
+        fi
         init_test_file $2
         exit 0
     fi

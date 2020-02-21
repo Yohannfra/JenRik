@@ -1,9 +1,5 @@
 #!/bin/bash
 
-# NAME idea :
-# JenRik
-# *.jrk
-
 RED="\u001b[31m"
 GREEN="\u001b[32m"
 RESET="\u001b[39m"
@@ -65,20 +61,19 @@ function parse_file()
         if ! [[ $BINARY_PATH ]]; then # get BINARY_PATH
             if [[ $(echo -E "$line" | grep "^BINARY_PATH=") ]]; then
                 BINARY_PATH=`echo $line | cut -d "=" -f2`
+                if ! [[ -x $BINARY_PATH ]]; then
+                    echo "$BINARY_PATH is not executable"
+                    exit 1
+                fi
             fi
         else
+            if ! [[ $BINARY_PATH ]]; then
+                echo "No binary given"
+                exit 1
+            fi
             parse_line "$line" $i
         fi
     done < $1
-
-    if ! [[ $BINARY_PATH ]]; then
-        echo "No binary given"
-        exit 1
-    fi
-    if ! [[ -x $BINARY_PATH ]]; then
-        echo "$BINARY_PATH is not executable"
-        exit 1
-    fi
 }
 
 function display_summary()

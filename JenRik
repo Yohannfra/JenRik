@@ -1,0 +1,112 @@
+#!/bin/bash
+
+# NAME idea :
+# JenRik
+# *.jrk
+
+RED="\u001b[31m"
+GREEN="\u001b[32m"
+RESET="\u001b[39m"
+
+NB_TESTS=0
+TESTS_FAILS=0
+
+function print_usage()
+{
+    echo USAGE : $1 test_file1.jrk [test_file2.jrk] ...
+}
+
+function execute_test()
+{
+    let "NB_TESTS=NB_TESTS+1"
+    echo -ne $TEST_NAME"\t:\t"$BINARY_PATH $TEST_ARGS "\t: "
+    output=$($BINARY_PATH)
+    status=$?
+
+    if [[ $status -ne $TEST_STATUS ]]; then
+        echo -ne "${RED}KO${RESET} : Expected exit status $TEST_STATUS but got $status"
+        let "TESTS_FAILS=TESTS_FAILS+1"
+        return
+    fi
+    if [[ $output != $TEST_STDOUT ]] && ! [[ -z $TEST_STDOUT ]]; then
+        echo -ne "${RED}KO${RESET} : Expected output |$TEST_STDOUT| but got |$output|"
+        let "TESTS_FAILS=TESTS_FAILS+1"
+        return
+    fi
+    echo -ne "${GREEN}OK${RESET}"
+}
+
+function parse_line()
+{
+    count_pipes=$(echo $1 | grep -o "|" | sed "s/ //g" | wc -m)
+
+    if [[ $count_pipes -lt 3 ]]; then
+        echo "INVALID LINE" $2
+        return
+    fi
+    TEST_NAME=$(echo $1 | cut -d "|" -f1)
+    TEST_ARGS=$(echo $1 | cut -d "|" -f2)
+    TEST_STATUS=$(echo $1 | cut -d "|" -f3)
+    TEST_STDOUT=$(echo $1 | cut -d "|" -f4)
+    execute_test
+    echo # just for a new line break
+}
+
+function parse_file()
+{
+    i=0
+    while read -r line
+    do
+        let "i=i+1"
+        # skip comments and empty lines
+        if [[ ${line:0:1} = '#' ]] || [[ -z $line ]]; then
+            continue
+        fi
+        if ! [[ $BINARY_PATH ]]; then # get BINARY_PATH
+            if [[ $(echo -E "$line" | grep "^BINARY_PATH=") ]]; then
+                BINARY_PATH=`echo $line | cut -d "=" -f2`
+            fi
+        else
+            parse_line "$line" $i
+        fi
+    done < $1
+
+    if ! [[ $BINARY_PATH ]]; then
+        echo "No binary given"
+        exit 1
+    fi
+    if ! [[ -x $BINARY_PATH ]]; then
+        echo "$BINARY_PATH is not executable"
+        exit 1
+    fi
+}
+
+function display_summary()
+{
+    echo -ne "\nSummary ${BINARY_PATH}: ${NB_TESTS} tests ran:\n"
+    echo -ne "$(($NB_TESTS-$TESTS_FAILS))\t:\t${GREEN}OK${RESET}\n"
+    echo -ne "$TESTS_FAILS\t:\t${RED}KO${RESET}\n"
+}
+
+function main()
+{
+    if [[ $# -lt 1 ]]; then
+        print_usage $0
+        exit 1
+    fi
+    for arg in "$@"; do
+        if ! [[ -r $arg ]] || [[ $arg != *.jrk ]]; then
+            echo "Invalid test file :" $arg
+            ERROR_OCCURED=1
+        else
+            parse_file $arg
+            display_summary
+        fi
+    done
+}
+
+main $@
+
+if [[ $ERROR_OCCURED ]]; then
+    exit 1
+fi

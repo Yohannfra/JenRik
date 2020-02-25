@@ -1,4 +1,4 @@
-# JenRik
+# JenRik (WIP)
 
 JenRik is a simple but powerfull enough testing script.
 
@@ -94,7 +94,8 @@ jenerik ./test_file.jrk
 - You can't use '|' (pipe) caracters in you tests because it's used by the parser to delimit fields.
 
 ## Roadmap
--   Improve the parser and make it more flexible
+- Switch to toml for the configuration file and rewrite it using Python or Go ?
+- Add the possibility to diff the output with an existing file
 
 ## Licence
     This project is licensed under the terms of the MIT license.

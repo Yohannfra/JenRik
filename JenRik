@@ -66,7 +66,7 @@ def check_tests_validity(test_name, values):
     """ Check if all the fieds of the test are known and are valids."""
     if type(values) != dict:
         sys.exit(f"Invalid test : '{test_name} {values}'")
-    known_tests_keys = ['args', 'status', 'stdout', 'stderr']
+    known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post']
     has_args = 'args' in values.keys()
     has_status = 'status' in values.keys()
 
@@ -133,9 +133,21 @@ class Tester:
         else:
             self.print_test_sucess()
 
+    def run_pre_post_command(self, command):
+        """ run pre and post commands """
+        if type(command) == str and command != "":
+            os.system(command)
+        elif type(command) == list and command != []:
+            for c in command:
+                if c != "" and type(command) == str:
+                    os.system(c)
+
     def run_test(self, values):
         """ run the test in a subprocess """
         self.count_tests += 1
+
+        if 'pre' in values:
+            self.run_pre_post_command(values['pre'])
         test_args = [self.binary_path] + values['args']
         process = subprocess.Popen(test_args,
                                    stdout=subprocess.PIPE,
@@ -143,6 +155,8 @@ class Tester:
         stdout, stderr = process.communicate()
         self.check_test_results(values, stdout.decode('utf-8'),
                                 stderr.decode('utf-8'), process.returncode)
+        if 'post' in values:
+            self.run_pre_post_command(values['post'])
 
     def print_summary(self):
         """ print a summary of the tests results """

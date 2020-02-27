@@ -26,7 +26,7 @@ def open_file(fp):
 
 
 def init_file(fp):
-    """ create a default test file """
+    """ Create a default test file """
     test_file_name = 'test_' + fp + '.toml'
 
     default_file_content = [
@@ -52,7 +52,7 @@ def init_file(fp):
 
 
 def check_binary_validity(binary_path):
-    """ check if the binary path is a valid executable file """
+    """ Check if the binary path is a valid executable file """
     if os.path.exists(binary_path):
         if not os.access(binary_path, os.X_OK):
             sys.exit(f"{binary_path} : is not executable")
@@ -61,24 +61,49 @@ def check_binary_validity(binary_path):
 
 
 def check_tests_validity(test_name, values):
-    pass
-
-
-def check_file_validity(content, fp):
-    binary_path = ""
+    """ Check if all the fieds of the test are known and are valids."""
+    if type(values) != dict:
+        sys.exit(f"Invalid test : '{test_name} {values}'")
     known_tests_keys = ['args', 'status', 'stdout', 'stderr']
+    has_args = 'args' in values.keys()
+    has_status = 'status' in values.keys()
+
+    if has_args == False or has_status == False:
+        sys.exit("Missing field : " + ("'args'" * (not has_args)) +
+                 (" and " * (not has_args and not has_status)) +
+                 ("'status'" * (not has_status)) + " in test : " + test_name)
+    for key in values:
+        if key not in known_tests_keys:
+            sys.exit(f"Unknown key : {key} in test {test_name}")
+
+
+def check_test_file_validity(content, fp):
+    """ Check if the toml test file is valid """
+    binary_path = ""
+    test_suite = {}
 
     for key in content.keys():
         if key == "binary_path":
             binary_path = content[key]
+            check_binary_validity(binary_path)
         else:
             check_tests_validity(key, content[key])
+            # If we arrived here then the test is valid
+            test_suite[key] = content[key]
 
     if binary_path == "":
         sys.exit(f"Could not find binary_path key in {fp}")
 
-    check_binary_validity(binary_path)
-    print(binary_path)
+    return test_suite
+
+
+class Tester:
+    def __init__(self, test_suite):
+        self.test_suite = test_suite
+
+    def launch(self):
+        for test in self.test_suite:
+            print(test, self.test_suite[test])
 
 
 def main(argc, argv):
@@ -90,7 +115,9 @@ def main(argc, argv):
         exit(0)
     elif argc == 2:
         content = open_file(argv[1])
-        check_file_validity(content, argv[1])
+        test_suite = check_test_file_validity(content, argv[1])
+        tester = Tester(test_suite)
+        tester.launch()
 
 
 if __name__ == '__main__':

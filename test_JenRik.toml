@@ -13,5 +13,16 @@ args = ["init"]
 status = 1
 
 [invalid_test_file]
-args = ["./JenRik.py"]
+args = ["toito"]
+stderr = "You must provide valid toml file\n"
+status = 1
+
+[invalid_test_file_but_toml]
+args = ["toito.toml"]
+stderr = "Could not open file toito.toml\n"
+status = 1
+
+[overwrite_init_test_JenRik_toml]
+args = ["init", "JenRik"]
+stderr = "test_JenRik.toml already exists, can't init the file\n"
 status = 1

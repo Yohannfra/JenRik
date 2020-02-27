@@ -165,7 +165,6 @@ def main(argc, argv):
         exit(1)
     if argc == 3:
         init_file(argv[2])
-        exit(0)
     elif argc == 2:
         content = open_file(argv[1])
         binary_path, test_suite = check_test_file_validity(content, argv[1])

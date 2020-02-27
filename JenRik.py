@@ -3,6 +3,8 @@
 import sys
 import toml
 import os
+import subprocess
+from termcolor import colored
 
 
 def print_help(binary_name):
@@ -94,16 +96,65 @@ def check_test_file_validity(content, fp):
     if binary_path == "":
         sys.exit(f"Could not find binary_path key in {fp}")
 
-    return test_suite
+    return binary_path, test_suite
 
 
 class Tester:
-    def __init__(self, test_suite):
+    """ The class containing everything to run the tests """
+    def __init__(self, binary_path, test_suite):
         self.test_suite = test_suite
+        self.binary_path = binary_path
+        self.count_tests = 0
+        self.count_failed_tests = 0
+
+    def print_test_sucess(self):
+        """ print a message if test success """
+        print(colored('OK', 'green'))
+
+    def print_test_failed(self, e):
+        """ print a message if test fails """
+        self.count_failed_tests += 1
+        print(colored('KO', 'red'), end=" : ")
+        print(e)
+
+    def check_test_results(self, values, stdout, stderr, status):
+        """ check the tests results """
+        if values['status'] != status:
+            self.print_test_failed("Invalid exit status, "
+                               f"expected {values['status']} but got {status}")
+        elif values['stdout'] != "" and values['stdout'] != stdout:
+            self.print_test_failed("Invalid stdout, "
+                           f"expected '{values['stdout']}' but got '{stdout}'")
+        elif values['stderr'] != "" and values['stderr'] != stderr:
+            self.print_test_failed("Invalid stderr, "
+                           f"expected '{values['stderr']}' but got '{stderr}'")
+        else:
+            self.print_test_sucess()
+
+    def run_test(self, values):
+        """ run the test in a subprocess """
+        self.count_tests += 1
+        test_args = [self.binary_path] + values['args']
+        process = subprocess.Popen(test_args,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        self.check_test_results(values, stdout.decode('utf-8'),
+                                stderr.decode('utf-8'), process.returncode)
+
+    def print_summary(self):
+        """ print a summary of the tests results """
+        count_success = self.count_tests - self.count_failed_tests
+        print(f"\nSummary {self.binary_path}: {self.count_tests} tests ran")
+        print(f"{count_success}\t:\t{colored('OK', 'green')}")
+        print(f"{self.count_failed_tests}\t:\t{colored('KO', 'red')}")
 
     def launch(self):
+        """ launch the tests on the test suite """
         for test in self.test_suite:
-            print(test, self.test_suite[test])
+            print(f"{test} : ", end='')
+            self.run_test(self.test_suite[test])
+        self.print_summary()
 
 
 def main(argc, argv):
@@ -115,8 +166,8 @@ def main(argc, argv):
         exit(0)
     elif argc == 2:
         content = open_file(argv[1])
-        test_suite = check_test_file_validity(content, argv[1])
-        tester = Tester(test_suite)
+        binary_path, test_suite = check_test_file_validity(content, argv[1])
+        tester = Tester(binary_path, test_suite)
         tester.launch()
 
 

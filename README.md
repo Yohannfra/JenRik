@@ -1,27 +1,20 @@
-# JenRik (WIP)
+# JenRik
 
-JenRik is a simple but powerfull enough testing script.
+JenRik is a simple but powerfull testing script.
 
-## Use case
-
-Before thinking about using it you should read this section.
-
-It's very simple and fast to setup JenRik and write tests for it.\
- But..\
-It can test only two things:
-- exit status
-- standart output
-
-Why only that ? because it's enough to thest a majority of simple scripts and programs.\
-
-JenRik is great to test error cases and not complicated output.\
-If you need more you should probably look for something else.
-
-If it's enough for you you're at the perfect place !
-What's great with JeneRik is that it can test any language, it only needs an executable.
+The main idea was to write a generic binary testing script.\
+JenRik simply parse a [toml](https://github.com/toml-lang/toml)
+file containing the tests and run them.
 
 ## Installation
 
+#### Dependencies:
+The only dependency is the python parser for toml. Install it with:
+```
+pip install toml
+```
+
+#### Installation from sources:
 ```bash
 git clone https://github.com/Yohannfra/JenRik
 cd JenRik
@@ -30,72 +23,64 @@ sudo ./install.sh
 
 ## Quick Start
 
-Let's say we need to test this basic shell script.
+##### Let's say we need to test this basic python script.
 
-my_prog.sh :
+my_prog.py :
+```python
+import sys
+
+if len(sys.argv) == 1:
+    print("No arguments given")
+    exit(1)
+else:
+    print(sys.argv)
+```
+
+##### First we need to init a test file for our my_prog.py
+
 ```bash
-#!/bin/bash
-
-if [[ $1 = "1" ]]; then
-    echo "it's 1 !"
-    exit 0
-else
-    echo "it's not 1"
-    exit 1
-fi
+$ jenerik init ./my_prog.py # you must give the path and not just the binary name
 ```
 
-First we need to init a test file for our my_prog.sh.\
-**A JeneRik test file ends with .jrk**
-```bash
-$ jenerik init ./my_prog.sh # you must give the path and not just the binary name
+It will create a *test_my_prog.toml* file with this content:
+```toml
+binary_path = "my_prog.py"
+
+# A sample test
+[test1]
+args = ["-h"]
+status = 0
+stdout=""
+stderr=""
+
 ```
 
-It will create a *my_prog.sh.jrk* file with this content:
-```
-BINARY_PATH=./my_prog.sh
+The first line ```binary_path = "my_prog.py"``` indicates the path to the binary to test.
 
-# test name |args|exit_status|stdout|
-sample test |-h|0||
+The line ```[test1]``` define a test and the following values are parts of it:
+```toml
+args = ["-h"] # the command line arguments
+status = 0    # the expected exit status
+stdout=""     # the expected stdout (not tested if empty)
+stderr=""     # the expected stderr (not tested if empty)
 ```
 
-The first line ```BINARY_PATH=./my_prog.sh``` indicates the path to the binary to test.
+⚠ Each test require at least the args and status values !
 
-Lines that start with a "#" are commentaries, they are ignored.
-The commentaty here explains how to create a test:
-1. The name of the test
-2. The command line arguments for this test
-3. The expected exit status
-4. The expected standart output
+stdout and stderr can be omitted.
 
-The line
-```
-sample test |-h|0||
-```
-Is an example test, it will start your program with '-h' as argument and expect it to exit 0.\
-As you can see the field of the standart output is empty. It means that you won't test test it.\
-You can also give an empty arguments field.
 
-Now delete the sample test line and add those two lines:
-```
-test 1 |1|0||
-test not 1 |2|1||
-```
-And... that's all, you can now go to the USAGE section to see how to run it.
+If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
 
 ## USAGE
 Once you have written the test file you just have to :
 ```
-jenerik ./test_file.jrk
+jenerik test_my_prog.toml
 ```
 
-## Limitations
-- For now the parser is quite basic so the .jrk syntax is very limited by it.
-- You can't use '|' (pipe) caracters in you tests because it's used by the parser to delimit fields.
-
 ## Roadmap
-- Switch to toml for the configuration file and rewrite it using Python or Go ?
 - Add the possibility to diff the output with an existing file
+- Add a pre and a post command
 
 ## Licence
     This project is licensed under the terms of the MIT license.

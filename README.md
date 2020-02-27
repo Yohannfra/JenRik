@@ -27,13 +27,14 @@ sudo ./install.sh
 
 my_prog.py :
 ```python
+#!/usr/bin/python3
 import sys
 
 if len(sys.argv) == 1:
     print("No arguments given")
     exit(1)
 else:
-    print(sys.argv)
+    print(sys.argv[1])
 ```
 
 ##### First we need to init a test file for our my_prog.py
@@ -52,7 +53,6 @@ args = ["-h"]
 status = 0
 stdout=""
 stderr=""
-
 ```
 
 The first line ```binary_path = "my_prog.py"``` indicates the path to the binary to test.
@@ -65,18 +65,43 @@ stdout=""     # the expected stdout (not tested if empty)
 stderr=""     # the expected stderr (not tested if empty)
 ```
 
-⚠ Each test require at least the args and status values !
+Now we can write the tests for our my_prog.py. First delete the sample test and write this instead
+```toml
+[test_no_arguments]
+args = []
+status = 1
+stdout="No arguments given\n"
 
+[with_args]
+args = ["Hello"]
+status = 0
+stdout="Hello\n"
+stderr=""
+```
+
+⚠ Each test require at least the args and status values !\
 stdout and stderr can be omitted.
 
-
 If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
+
+See [#USAGE](Usage) to run the tests
 
 ## USAGE
 Once you have written the test file you just have to :
 ```
 jenerik test_my_prog.toml
 ```
+
+The output will look like that
+```
+test_no_arguments : OK
+with_args : OK
+
+Summary ./my_prog.py: 2 tests ran
+2 : OK
+0 : KO
+```
+
 
 ## Roadmap
 - Add the possibility to diff the output with an existing file

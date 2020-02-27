@@ -4,6 +4,7 @@ import sys
 import toml
 import os
 
+
 def print_help(binary_name):
     """ Print a basic help showing how to use Jenerik """
     print(f"USAGE : {binary_name} file.jrk | init path_to_binary")
@@ -19,7 +20,7 @@ def open_file(fp):
     except:
         sys.exit(f"Could not open file {fp}")
     c = f.read()
-    content = toml.loads(c) # Parse the toml file
+    content = toml.loads(c)  # Parse the toml file
     f.close()
     return content
 
@@ -49,6 +50,7 @@ def init_file(fp):
     f.close()
     print(f"Initialized {test_file_name} with success")
 
+
 def check_binary_validity(binary_path):
     """ check if the binary path is a valid executable file """
     if os.path.exists(binary_path):
@@ -57,8 +59,10 @@ def check_binary_validity(binary_path):
     else:
         sys.exit(f"{binary_path} : file not found")
 
+
 def check_tests_validity(test_name, values):
     pass
+
 
 def check_file_validity(content, fp):
     binary_path = ""
@@ -87,6 +91,7 @@ def main(argc, argv):
     elif argc == 2:
         content = open_file(argv[1])
         check_file_validity(content, argv[1])
+
 
 if __name__ == '__main__':
     main(len(sys.argv), sys.argv)

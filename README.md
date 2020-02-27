@@ -84,9 +84,9 @@ stdout and stderr can be omitted.
 
 If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
 
-See [#USAGE](Usage) to run the tests
+See [Usage](#Usage) to run the tests
 
-## USAGE
+## Usage
 Once you have written the test file you just have to :
 ```
 jenerik test_my_prog.toml

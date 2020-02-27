@@ -1,129 +1,177 @@
-#!/bin/bash
+#!/usr/bin/python3
 
-RED="\u001b[31m"
-GREEN="\u001b[32m"
-RESET="\u001b[39m"
+import sys
+import toml
+import os
+import subprocess
+from termcolor import colored
 
-NB_TESTS=0
-TESTS_FAILS=0
 
-function print_usage()
-{
-    echo "USAGE : $1 test_file1.jrk [test_file2.jrk] | init path_to_binary"
-    echo -e "\tinit\tcreate a basic test file for the given binary"
-}
+def print_help(binary_name):
+    """ Print a basic help showing how to use Jenerik """
+    print(f"USAGE : {binary_name} file.jrk | init path_to_binary")
+    print("\tinit\tcreate a basic test file for the given binary")
 
-function execute_test()
-{
-    let "NB_TESTS=NB_TESTS+1"
-    echo -ne $TEST_NAME"\t:\t"$BINARY_PATH $TEST_ARGS "\t: "
-    output=$($BINARY_PATH ${TEST_ARGS})
-    status=$?
 
-    if [[ $status -ne $TEST_STATUS ]]; then
-        echo -ne "${RED}KO${RESET} : Expected exit status $TEST_STATUS but got $status"
-        let "TESTS_FAILS=TESTS_FAILS+1"
-        return
-    fi
-    if [[ $output != $TEST_STDOUT ]] && ! [[ -z $TEST_STDOUT ]]; then
-        echo -ne "${RED}KO${RESET} : Expected output |$TEST_STDOUT| but got |$output|"
-        let "TESTS_FAILS=TESTS_FAILS+1"
-        return
-    fi
-    echo -ne "${GREEN}OK${RESET}"
-}
+def open_file(fp):
+    """ Open the toml file and parse it """
+    if not fp.endswith(".toml"):
+        sys.exit("You must provide valid toml file")
+    try:
+        f = open(fp, 'r')
+    except:
+        sys.exit(f"Could not open file {fp}")
+    c = f.read()
+    content = toml.loads(c)  # Parse the toml file
+    f.close()
+    return content
 
-function parse_line()
-{
-    count_pipes=$(echo $1 | grep -o "|" | sed "s/ //g" | wc -m)
 
-    if [[ $count_pipes -lt 3 ]]; then
-        echo "INVALID LINE" $2
-        return
-    fi
-    TEST_NAME=$(echo $1 | cut -d "|" -f1)
-    TEST_ARGS=$(echo $1 | cut -d "|" -f2)
-    TEST_STATUS=$(echo $1 | cut -d "|" -f3)
-    TEST_STDOUT=$(echo $1 | cut -d "|" -f4)
-    execute_test
-    echo # just for a new line break
-}
+def init_file(fp):
+    """ Create a default test file """
+    test_file_name = 'test_' + fp + '.toml'
 
-function parse_file()
-{
-    i=0
-    while read -r line
-    do
-        let "i=i+1"
-        # skip comments and empty lines
-        if [[ ${line:0:1} = '#' ]] || [[ -z $line ]]; then
-            continue
-        fi
-        if ! [[ $BINARY_PATH ]]; then # get BINARY_PATH
-            if [[ $(echo -E "$line" | grep "^BINARY_PATH=") ]]; then
-                BINARY_PATH=`echo $line | cut -d "=" -f2`
-                if ! [[ -x $BINARY_PATH ]]; then
-                    echo "$BINARY_PATH is not executable"
-                    exit 1
-                fi
-            fi
-        else
-            if ! [[ $BINARY_PATH ]]; then
-                echo "No binary given"
-                exit 1
-            fi
-            parse_line "$line" $i
-        fi
-    done < $1
-}
+    default_file_content = [
+        f"binary_path = \"{fp}\"\n\n",
+        "# A sample test\n",
+        "[test1]\n",
+        "args = [\"-h\"]\n",
+        "status = 0\n",
+        "stdout=\"\"\n",
+        "stderr=\"\"\n",
+    ]
 
-function display_summary()
-{
-    echo -ne "\nSummary ${BINARY_PATH}: ${NB_TESTS} tests ran:\n"
-    echo -ne "$(($NB_TESTS-$TESTS_FAILS))\t:\t${GREEN}OK${RESET}\n"
-    echo -ne "$TESTS_FAILS\t:\t${RED}KO${RESET}\n"
-}
+    if os.path.exists(test_file_name):
+        sys.exit(f"{test_file_name} already exists, can't init the file")
+    try:
+        f = open(test_file_name, 'w')
+    except:
+        sys.exit(f"Could not create file {test_file_name}")
+    for line in default_file_content:
+        f.write(line)
+    f.close()
+    print(f"Initialized {test_file_name} with success")
 
-function init_test_file()
-{
-    if [[ -f "$1.jrk" ]]; then
-        echo "$1.jrk already exists"
-        exit 1
-    fi
-    file="$1.jrk"
-    touch $file
-    echo -e "BINARY_PATH=$1\n" > $file
-    echo -e "# test name |args|exit_status|stdout|" >> $file
-    echo -e "sample test |-h|0||" >> $file
-}
 
-function main()
-{
-    if [[ $# -lt 1 ]]; then
-        print_usage $0
-        exit 1
-    fi
-    if [[ $1 = "init" ]]; then
-        if [[  $# -ne 2 ]]; then
-            echo "You must provide the path to the binary"
-            exit 1
-        fi
-        init_test_file $2
-        exit 0
-    fi
-    for arg in "$@"; do
-        if ! [[ -r $arg ]] || [[ $arg != *.jrk ]]; then
-            echo "Invalid test file :" $arg
-            ERROR_OCCURED=1
-        else
-            parse_file $arg
-            display_summary
-        fi
-    done
-}
+def check_binary_validity(binary_path):
+    """ Check if the binary path is a valid executable file """
+    if os.path.exists(binary_path):
+        if not os.access(binary_path, os.X_OK):
+            sys.exit(f"{binary_path} : is not executable")
+    else:
+        sys.exit(f"{binary_path} : file not found")
 
-main $@
 
-if [[ $ERROR_OCCURED ]]; then
-    exit 1
-fi
+def check_tests_validity(test_name, values):
+    """ Check if all the fieds of the test are known and are valids."""
+    if type(values) != dict:
+        sys.exit(f"Invalid test : '{test_name} {values}'")
+    known_tests_keys = ['args', 'status', 'stdout', 'stderr']
+    has_args = 'args' in values.keys()
+    has_status = 'status' in values.keys()
+
+    if has_args == False or has_status == False:
+        sys.exit("Missing field : " + ("'args'" * (not has_args)) +
+                 (" and " * (not has_args and not has_status)) +
+                 ("'status'" * (not has_status)) + " in test : " + test_name)
+    for key in values:
+        if key not in known_tests_keys:
+            sys.exit(f"Unknown key : {key} in test {test_name}")
+
+
+def check_test_file_validity(content, fp):
+    """ Check if the toml test file is valid """
+    binary_path = ""
+    test_suite = {}
+
+    for key in content.keys():
+        if key == "binary_path":
+            binary_path = content[key]
+            check_binary_validity(binary_path)
+        else:
+            check_tests_validity(key, content[key])
+            # If we arrived here then the test is valid
+            test_suite[key] = content[key]
+
+    if binary_path == "":
+        sys.exit(f"Could not find binary_path key in {fp}")
+
+    return binary_path, test_suite
+
+
+class Tester:
+    """ The class containing everything to run the tests """
+    def __init__(self, binary_path, test_suite):
+        self.test_suite = test_suite
+        self.binary_path = binary_path
+        self.count_tests = 0
+        self.count_failed_tests = 0
+
+    def print_test_sucess(self):
+        """ print a message if test success """
+        print(colored('OK', 'green'))
+
+    def print_test_failed(self, e):
+        """ print a message if test fails """
+        self.count_failed_tests += 1
+        print(colored('KO', 'red'), end=" : ")
+        print(e)
+
+    def check_test_results(self, values, stdout, stderr, status):
+        """ check the tests results """
+        if values['status'] != status:
+            self.print_test_failed("Invalid exit status, "
+                               f"expected {values['status']} but got {status}")
+        elif 'stdout' in values and values['stdout'] != "" \
+            and values['stdout'] != stdout:
+            self.print_test_failed("Invalid stdout, "
+                           f"expected '{values['stdout']}' but got '{stdout}'")
+        elif 'stderr' in values and values['stderr'] != "" \
+            and values['stderr'] != stderr:
+            self.print_test_failed("Invalid stderr, "
+                           f"expected '{values['stderr']}' but got '{stderr}'")
+        else:
+            self.print_test_sucess()
+
+    def run_test(self, values):
+        """ run the test in a subprocess """
+        self.count_tests += 1
+        test_args = [self.binary_path] + values['args']
+        process = subprocess.Popen(test_args,
+                                   stdout=subprocess.PIPE,
+                                   stderr=subprocess.PIPE)
+        stdout, stderr = process.communicate()
+        self.check_test_results(values, stdout.decode('utf-8'),
+                                stderr.decode('utf-8'), process.returncode)
+
+    def print_summary(self):
+        """ print a summary of the tests results """
+        count_success = self.count_tests - self.count_failed_tests
+        print(f"\nSummary {self.binary_path}: {self.count_tests} tests ran")
+        print(f"{count_success} : {colored('OK', 'green')}")
+        print(f"{self.count_failed_tests} : {colored('KO', 'red')}")
+
+    def launch(self):
+        """ launch the tests on the test suite """
+        for test in self.test_suite:
+            print(f"{test} : ", end='')
+            self.run_test(self.test_suite[test])
+        self.print_summary()
+
+
+def main(argc, argv):
+    if argc == 1 or argc > 3 or argc == 3 and argv[1] != 'init':
+        print_help(argv[0])
+        exit(1)
+    if argc == 3:
+        init_file(argv[2])
+        exit(0)
+    elif argc == 2:
+        content = open_file(argv[1])
+        binary_path, test_suite = check_test_file_validity(content, argv[1])
+        tester = Tester(binary_path, test_suite)
+        tester.launch()
+
+
+if __name__ == '__main__':
+    main(len(sys.argv), sys.argv)

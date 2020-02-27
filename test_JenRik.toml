@@ -1,0 +1,17 @@
+binary_path = "./JenRik"
+
+[invalid_arg]
+args = ["-h"]
+status = 1
+
+[no_args]
+args = []
+status = 1
+
+[init_only]
+args = ["init"]
+status = 1
+
+[invalid_test_file]
+args = ["./JenRik.py"]
+status = 1

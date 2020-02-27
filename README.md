@@ -1,8 +1,8 @@
 # JenRik
 
-JenRik is a simple but powerfull testing script.
+JenRik is a simple but powerfull testing tool.
 
-The main idea was to write a generic binary testing script.\
+The main idea was to write a generic binary testing tool.\
 JenRik simply parse a [toml](https://github.com/toml-lang/toml)
 file containing the tests and run them.
 

@@ -82,6 +82,14 @@ stderr=""
 ⚠ Each test require at least the args and status values !\
 stdout and stderr can be omitted.
 
+There are two other available commands:
+- ***pre*** : run a shell command before executing the test
+- ***post*** : run a shell command after executing the test
+
+***pre*** is usefull if you need to prepare a file needed by your programm for a test\
+***post*** is mainly usefull to cleanup after a test
+
+
 If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
 
 See [Usage](#Usage) to run the tests
@@ -105,7 +113,7 @@ Summary ./my_prog.py: 2 tests ran
 
 ## Roadmap
 - Add the possibility to diff the output with an existing file
-- Add a pre and a post command
+- ~~Add a pre and a post command~~
 
 ## Licence
     This project is licensed under the terms of the MIT license.

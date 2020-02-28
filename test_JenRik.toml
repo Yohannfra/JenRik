@@ -26,3 +26,8 @@ status = 1
 args = ["init", "JenRik"]
 stderr = "test_JenRik.toml already exists, can't init the file\n"
 status = 1
+
+[test_working_init]
+args = ["init", "my_bin"]
+status = 0
+post = "rm -f test_my_bin.toml"

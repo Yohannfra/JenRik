@@ -1,0 +1,6 @@
+binary_path = "./JenRik"
+
+[invalid_test]
+args = ["-h"]
+status = 1
+toto = 12

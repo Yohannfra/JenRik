@@ -1,0 +1,7 @@
+binary_path = "./JenRik"
+
+[invalid_test]
+args = ["-h"]
+status = 1
+stdout_file="./toto"
+stdout="tutu"

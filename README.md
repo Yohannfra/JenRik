@@ -115,7 +115,7 @@ Summary ./my_prog.py: 2 tests ran
 
 
 ## Roadmap
-- Add the possibility to diff the output with an existing file
+- ~~Add the possibility to diff the output with an existing file~~
 - ~~Add a pre and a post command~~
 
 ## Licence

@@ -82,7 +82,7 @@ stderr=""
 ⚠ Each test require at least the args and status values !\
 stdout and stderr can be omitted.
 
-There are two other available commands:
+There are a few other available commands:
 - ***pre*** : run a shell command before executing the test
 - ***post*** : run a shell command after executing the test
 - ***stderr_file*** : conpare your program stderr with the content of a given file

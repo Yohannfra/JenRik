@@ -113,6 +113,12 @@ Summary ./my_prog.py: 2 tests ran
 0 : KO
 ```
 
+## Tests
+
+Jenrik tests itself.
+```
+JenRik test_JenRik.toml
+```
 
 ## Roadmap
 - ~~Add the possibility to diff the output with an existing file~~

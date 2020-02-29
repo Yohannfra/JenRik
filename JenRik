@@ -19,9 +19,9 @@ def open_file(fp):
         sys.exit("You must provide valid toml file")
     try:
         f = open(fp, 'r')
+        c = f.read()
     except:
         sys.exit(f"Could not open file {fp}")
-    c = f.read()
     content = toml.loads(c)  # Parse the toml file
     f.close()
     return content
@@ -66,17 +66,25 @@ def check_tests_validity(test_name, values):
     """ Check if all the fieds of the test are known and are valids."""
     if type(values) != dict:
         sys.exit(f"Invalid test : '{test_name} {values}'")
-    known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post']
+    known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post',
+                        'stdout_file', 'stderr_file']
     has_args = 'args' in values.keys()
     has_status = 'status' in values.keys()
 
     if has_args == False or has_status == False:
-        sys.exit("Missing field : " + ("'args'" * (not has_args)) +
+        sys.exit(test_name + ": Missing field : " + ("'args'" * (not has_args)) +
                  (" and " * (not has_args and not has_status)) +
-                 ("'status'" * (not has_status)) + " in test : " + test_name)
+                 ("'status'" * (not has_status)))
     for key in values:
         if key not in known_tests_keys:
-            sys.exit(f"Unknown key : {key} in test {test_name}")
+            sys.exit(f"{test_name}: Unknown key : {key}")
+
+    if 'stderr' in values.keys() and 'stderr_file' in values.keys():
+        sys.exit(
+            f"{test_name}: Duplicated stderr keys, you can\'t use both 'stderr' and 'stderr_file' for a test")
+    if 'stdout' in values.keys() and 'stdout_file' in values.keys():
+        sys.exit(
+            f"{test_name}: Duplicated stdout keys, you can\'t use both 'stdout' and 'stdout_file' for a test")
 
 
 def check_test_file_validity(content, fp):
@@ -101,6 +109,7 @@ def check_test_file_validity(content, fp):
 
 class Tester:
     """ The class containing everything to run the tests """
+
     def __init__(self, binary_path, test_suite):
         self.test_suite = test_suite
         self.binary_path = binary_path
@@ -117,19 +126,42 @@ class Tester:
         print(colored('KO', 'red'), end=" : ")
         print(e)
 
+    def comp_output_file(self, output_file, output, output_name):
+        """ compare an output with a given file """
+        if os.path.exists(output_file):
+            if not os.access(output_file, os.R_OK):
+                sys.exit(f"{output_file} : is not readable")
+        else:
+            sys.exit(f"{output_file} : file not found")
+        try:
+            f = open(output_file, 'r')
+            fc = f.read()
+            f.close()
+        except:
+            sys.exit(f"{output_file} : could not open and read file")
+        if output != fc:
+            self.print_test_failed(f"Invalid {output_name}, "
+                                   f"expected '{fc}' but got '{output}'")
+            return True
+        return False
+
     def check_test_results(self, values, stdout, stderr, status):
         """ check the tests results """
         if values['status'] != status:
             self.print_test_failed("Invalid exit status, "
-                               f"expected {values['status']} but got {status}")
+                                   f"expected {values['status']} but got {status}")
         elif 'stdout' in values and values['stdout'] != "" \
-            and values['stdout'] != stdout:
+                and values['stdout'] != stdout:
             self.print_test_failed("Invalid stdout, "
-                           f"expected '{values['stdout']}' but got '{stdout}'")
+                                   f"expected '{values['stdout']}' but got '{stdout}'")
         elif 'stderr' in values and values['stderr'] != "" \
-            and values['stderr'] != stderr:
+                and values['stderr'] != stderr:
             self.print_test_failed("Invalid stderr, "
-                           f"expected '{values['stderr']}' but got '{stderr}'")
+                                   f"expected '{values['stderr']}' but got '{stderr}'")
+        elif 'stdout_file' in values and self.comp_output_file(values['stdout_file'], stdout, 'stdout'):
+            pass
+        elif 'stderr_file' in values and self.comp_output_file(values['stderr_file'], stderr, 'stderr'):
+            pass
         else:
             self.print_test_sucess()
 

@@ -85,9 +85,12 @@ stdout and stderr can be omitted.
 There are two other available commands:
 - ***pre*** : run a shell command before executing the test
 - ***post*** : run a shell command after executing the test
+- ***stderr_file*** : conpare your program stderr with the content of a given file
+- ***stdout_file*** : conpare your program stdout with the content of a given file
 
 ***pre*** is usefull if you need to prepare a file needed by your programm for a test\
-***post*** is mainly usefull to cleanup after a test
+***post*** is mainly usefull to cleanup after a test\
+***stderr_file*** and ***stdout_file*** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.\
 
 
 If you want more examples on how to write tests you should see this [file](test_JenRik.toml)

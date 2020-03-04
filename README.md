@@ -92,6 +92,7 @@ There are a few other available commands:
 ***post*** is mainly usefull to cleanup after a test\
 ***stderr_file*** and ***stdout_file*** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.\
 
+⚠ Don't forget that the paths are all relatives to the test file.
 
 If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
 

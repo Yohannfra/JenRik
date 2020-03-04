@@ -123,6 +123,7 @@ JenRik test_JenRik.toml
 ## Roadmap
 - ~~Add the possibility to diff the output with an existing file~~
 - ~~Add a pre and a post command~~
+- Add pipe_stdout and pipe_stderr
 
 ## Licence
     This project is licensed under the terms of the MIT license.

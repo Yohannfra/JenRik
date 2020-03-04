@@ -53,11 +53,13 @@ def init_file(fp):
     print(f"Initialized {test_file_name} with success")
 
 
-def check_binary_validity(binary_path):
+def check_binary_validity(binary_path, relative_path):
     """ Check if the binary path is a valid executable file """
     if os.path.exists(binary_path):
-        if not os.access(binary_path, os.X_OK):
+        if not os.access(relative_path + binary_path, os.X_OK):
             sys.exit(f"{binary_path} : is not executable")
+        elif os.path.isdir(relative_path + binary_path):
+            sys.exit(f"{binary_path} : is a directory")
     else:
         sys.exit(f"{binary_path} : file not found")
 
@@ -87,7 +89,7 @@ def check_tests_validity(test_name, values):
             f"{test_name}: Duplicated stdout keys, you can\'t use both 'stdout' and 'stdout_file' for a test")
 
 
-def check_test_file_validity(content, fp):
+def check_test_file_validity(content, fp, relative_path):
     """ Check if the toml test file is valid """
     binary_path = ""
     test_suite = {}
@@ -95,7 +97,7 @@ def check_test_file_validity(content, fp):
     for key in content.keys():
         if key == "binary_path":
             binary_path = content[key]
-            check_binary_validity(binary_path)
+            check_binary_validity(binary_path, relative_path)
         else:
             check_tests_validity(key, content[key])
             # If we arrived here then the test is valid
@@ -104,17 +106,18 @@ def check_test_file_validity(content, fp):
     if binary_path == "":
         sys.exit(f"Could not find binary_path key in {fp}")
 
-    return binary_path, test_suite
+    return (relative_path + binary_path), test_suite
 
 
 class Tester:
     """ The class containing everything to run the tests """
 
-    def __init__(self, binary_path, test_suite):
+    def __init__(self, binary_path, test_suite, relative_path):
         self.test_suite = test_suite
         self.binary_path = binary_path
         self.count_tests = 0
         self.count_failed_tests = 0
+        self.relative_path = relative_path
 
     def print_test_sucess(self):
         """ print a message if test success """
@@ -128,6 +131,7 @@ class Tester:
 
     def comp_output_file(self, output_file, output, output_name):
         """ compare an output with a given file """
+        output_file = (self.relative_path + output_file).replace('/./', '/')
         if os.path.exists(output_file):
             if not os.access(output_file, os.R_OK):
                 sys.exit(f"{output_file} : is not readable")
@@ -213,8 +217,12 @@ def main(argc, argv):
         init_file(argv[2])
     elif argc == 2:
         content = open_file(argv[1])
-        binary_path, test_suite = check_test_file_validity(content, argv[1])
-        tester = Tester(binary_path, test_suite)
+        relative_path = "/".join(argv[1].split('/')[0:-1]) + '/'
+        if '/' == relative_path and '/' not in argv[1]: # dirty but works
+            relative_path = './'
+        binary_path, test_suite = check_test_file_validity(content, argv[1], relative_path)
+        binary_path = binary_path.replace('././', './')
+        tester = Tester(binary_path, test_suite, relative_path)
         tester.launch()
 
 

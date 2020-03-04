@@ -1,1 +1,1 @@
-binary_path = "./tests/non_executable.toml"
+binary_path = "./non_executable.toml"

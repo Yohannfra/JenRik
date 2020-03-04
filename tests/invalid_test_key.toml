@@ -1,4 +1,4 @@
-binary_path = "./JenRik"
+binary_path = "../JenRik"
 
 [invalid_test]
 args = ["-h"]

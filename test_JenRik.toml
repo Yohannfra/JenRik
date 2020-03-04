@@ -65,4 +65,4 @@ stderr = "Invalid test : 'my_bad_test toto'\n"
 [invalid_ouput_file]
 args = ["tests/invalid_output_file.toml"]
 status = 1
-stderr = "./help_msg.txt : file not found\n"
+stderr = "tests/README.md : file not found\n"

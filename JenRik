@@ -72,7 +72,7 @@ def check_tests_validity(test_name, values):
         sys.exit(f"Invalid test : '{test_name} {values}'")
     known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post',
                         'stdout_file', 'stderr_file', 'pipe_stdout',
-                        'pipe_stderr', 'timeout']
+                        'pipe_stderr', 'timeout', 'should_fail']
     has_args = 'args' in values.keys()
     has_status = 'status' in values.keys()
 
@@ -91,8 +91,9 @@ def check_tests_validity(test_name, values):
         sys.exit(
             f"{test_name}: Duplicated stdout keys, you can\'t use both 'stdout' and 'stdout_file' for a test")
     if 'timeout' in values.keys() and type(values['timeout']) != float and type(values['timeout']) != int:
-        print(type(values['timeout']))
         sys.exit(f"{test_name}: timeout value must be a float or an int")
+    if 'should_fail' in values.keys() and values['should_fail'] != 1 and values['should_fail'] != 0:
+        sys.exit(f"{test_name}: should_fail value must be a boolean")
 
 
 def check_test_file_validity(content, fp, relative_path):
@@ -122,15 +123,20 @@ class Tester:
         self.test_suite = test_suite
         self.binary_path = binary_path
         self.count_tests = 0
+        self.test_should_fail = -1
         self.count_failed_tests = 0
         self.relative_path = relative_path
 
     def print_test_sucess(self):
         """ print a message if test success """
+        if self.test_should_fail == 0:
+            return self.print_test_failed("Test should have failed")
         print(colored('OK', 'green'))
 
     def print_test_failed(self, e):
         """ print a message if test fails """
+        if self.test_should_fail == 1:
+            return self.print_test_sucess()
         self.count_failed_tests += 1
         print(colored('KO', 'red'), end=" : ")
         print(e)
@@ -228,6 +234,9 @@ class Tester:
     def launch(self):
         """ launch the tests on the test suite """
         for test in self.test_suite:
+            self.test_should_fail = -1
+            if 'should_fail' in self.test_suite[test].keys():
+                self.test_should_fail = self.test_suite[test]['should_fail']
             print(f"{test} : ", end='')
             self.run_test(self.test_suite[test])
         self.print_summary()

@@ -89,3 +89,14 @@ stderr = "invalid_test\n"
 args = []
 status = 1
 timeout= 0.1
+
+[test_timeout_fail]
+args = []
+status = 1
+timeout= 0
+should_fail = true
+
+[test_status_should_fail]
+args = []
+status = 0
+should_fail = true

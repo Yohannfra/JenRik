@@ -5,6 +5,7 @@ import toml
 import os
 import subprocess
 from termcolor import colored
+import shlex
 
 
 def print_help(binary_name):
@@ -69,7 +70,7 @@ def check_tests_validity(test_name, values):
     if type(values) != dict:
         sys.exit(f"Invalid test : '{test_name} {values}'")
     known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post',
-                        'stdout_file', 'stderr_file']
+                        'stdout_file', 'stderr_file', 'pipe_stdout', 'pipe_stderr']
     has_args = 'args' in values.keys()
     has_status = 'status' in values.keys()
 
@@ -149,19 +150,32 @@ class Tester:
             return True
         return False
 
+
+    def apply_pipe(self, output, pipe):
+        if pipe == "":
+            return output
+        output = os.popen('echo ' + shlex.quote(output.rstrip("\n")) + ' ' + pipe).read()
+        return output
+
+
     def check_test_results(self, values, stdout, stderr, status):
         """ check the tests results """
+        if 'pipe_stdout' in values:
+            stdout = self.apply_pipe(stdout, values['pipe_stdout'])
+        if 'pipe_stderr' in values:
+            stderr = self.apply_pipe(stderr, values['pipe_stderr'])
+
         if values['status'] != status:
             self.print_test_failed("Invalid exit status, "
                                    f"expected {values['status']} but got {status}")
         elif 'stdout' in values and values['stdout'] != "" \
                 and values['stdout'] != stdout:
             self.print_test_failed("Invalid stdout, "
-                                   f"expected '{values['stdout']}' but got '{stdout}'")
+                                   f"expected {values['stdout'].encode('utf-8')} but got {stdout.encode('utf-8')}")
         elif 'stderr' in values and values['stderr'] != "" \
                 and values['stderr'] != stderr:
             self.print_test_failed("Invalid stderr, "
-                                   f"expected '{values['stderr']}' but got '{stderr}'")
+                                   f"expected {values['stderr'].encode('utf-8')} but got {stderr.encode('utf-8')}")
         elif 'stdout_file' in values and self.comp_output_file(values['stdout_file'], stdout, 'stdout'):
             pass
         elif 'stderr_file' in values and self.comp_output_file(values['stderr_file'], stderr, 'stderr'):

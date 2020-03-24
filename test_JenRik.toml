@@ -66,3 +66,21 @@ stderr = "Invalid test : 'my_bad_test toto'\n"
 args = ["tests/invalid_output_file.toml"]
 status = 1
 stderr = "tests/README.md : file not found\n"
+
+[test_pipe_basic_stdout]
+args = []
+status = 1
+pipe_stdout = "| grep \"USAGE\""
+stdout = "USAGE : ./JenRik file.jrk | init path_to_binary\n"
+
+[test_pipe_two_pipes_stdout]
+args = []
+status = 1
+pipe_stdout = "| grep \"USAGE\" | cut -d ' ' -f1"
+stdout = "USAGE\n"
+
+[test_pipe_stderr]
+args = ["tests/duplicate_stderr.toml"]
+status = 1
+pipe_stderr = "| cut -d ':' -f1"
+stderr = "invalid_test\n"

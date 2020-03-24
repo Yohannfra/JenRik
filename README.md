@@ -85,8 +85,11 @@ stdout and stderr can be omitted.
 There are a few other available commands:
 - ***pre*** : run a shell command before executing the test
 - ***post*** : run a shell command after executing the test
-- ***stderr_file*** : conpare your program stderr with the content of a given file
-- ***stdout_file*** : conpare your program stdout with the content of a given file
+- ***stderr_file*** : compare your program stderr with the content of a given file
+- ***stdout_file*** : compare your program stdout with the content of a given file
+- ***pipe_stdout*** : redirect your program stdout to a specified shell command before checking it
+- ***pipe_stderr*** : redirect your program stderr to a specified shell command before checking it
+
 
 ***pre*** is usefull if you need to prepare a file needed by your programm for a test\
 ***post*** is mainly usefull to cleanup after a test\
@@ -124,7 +127,8 @@ JenRik test_JenRik.toml
 ## Roadmap
 - [x] the possibility to diff the output with an existing file
 - [x] Add a pre and a post command
-- [ ] Add pipe_stdout and pipe_stderr
+- [x] Add pipe_stdout and pipe_stderr
+- [ ] Add a timout feature
 
 ## Licence
     This project is licensed under the terms of the MIT license.

@@ -89,15 +89,59 @@ There are a few other available commands:
 - ***stdout_file*** : compare your program stdout with the content of a given file
 - ***pipe_stdout*** : redirect your program stdout to a specified shell command before checking it
 - ***pipe_stderr*** : redirect your program stderr to a specified shell command before checking it
-
+- ***should_fail*** : make the test sucess if it fails
+- ***timeout*** : make the test fail if it times out (the time is given in seconds)
 
 ***pre*** is usefull if you need to prepare a file needed by your programm for a test\
 ***post*** is mainly usefull to cleanup after a test\
-***stderr_file*** and ***stdout_file*** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.\
+***stderr_file*** and ***stdout_file*** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.
 
 ⚠ Don't forget that the paths are all relatives to the test file.
 
 If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
+
+Here is a quick example of how to use all availables commands
+
+```toml
+# args 
+args = []
+args = ["-h"]
+args = ["1", "2", "3"]
+
+# status
+status = 1
+
+# stdout
+stdout="Hello\n"
+
+# stderr
+stderr="Hello err\n"
+
+# pre
+pre = "touch test.txt && echo 'hello' > test.txt"
+
+# post
+post = "rm -f test.txt"
+
+# stderr_file
+stderr_file = "./my_file.txt"
+
+# stdout_file
+stdout_file = "./my_file.txt"
+
+# pipe_stdout
+pipe_stdout = "| grep 'Usage'"
+
+# pipe_stderr
+pipe_stderr = "| cut -d ':' -f1"
+
+# should_fail (true or false)
+should_fail = true
+
+# timeout (in seconds)
+timeout = 0.4
+
+```
 
 See [Usage](#Usage) to run the tests
 
@@ -128,7 +172,7 @@ JenRik test_JenRik.toml
 - [x] the possibility to diff the output with an existing file
 - [x] Add a pre and a post command
 - [x] Add pipe_stdout and pipe_stderr
-- [ ] Add a timout feature
+- [x] Add a timout feature
 
 ## Licence
     This project is licensed under the terms of the MIT license.

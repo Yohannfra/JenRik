@@ -84,3 +84,8 @@ args = ["tests/duplicate_stderr.toml"]
 status = 1
 pipe_stderr = "| cut -d ':' -f1"
 stderr = "invalid_test\n"
+
+[test_timeout_success]
+args = []
+status = 1
+timeout= 0.1

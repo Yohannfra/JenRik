@@ -6,6 +6,7 @@ import os
 import subprocess
 from termcolor import colored
 import shlex
+import time
 
 
 def print_help(binary_name):
@@ -70,7 +71,8 @@ def check_tests_validity(test_name, values):
     if type(values) != dict:
         sys.exit(f"Invalid test : '{test_name} {values}'")
     known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post',
-                        'stdout_file', 'stderr_file', 'pipe_stdout', 'pipe_stderr']
+                        'stdout_file', 'stderr_file', 'pipe_stdout',
+                        'pipe_stderr', 'timeout']
     has_args = 'args' in values.keys()
     has_status = 'status' in values.keys()
 
@@ -88,6 +90,9 @@ def check_tests_validity(test_name, values):
     if 'stdout' in values.keys() and 'stdout_file' in values.keys():
         sys.exit(
             f"{test_name}: Duplicated stdout keys, you can\'t use both 'stdout' and 'stdout_file' for a test")
+    if 'timeout' in values.keys() and type(values['timeout']) != float and type(values['timeout']) != int:
+        print(type(values['timeout']))
+        sys.exit(f"{test_name}: timeout value must be a float or an int")
 
 
 def check_test_file_validity(content, fp, relative_path):
@@ -199,12 +204,17 @@ class Tester:
         if 'pre' in values:
             self.run_pre_post_command(values['pre'])
         test_args = [self.binary_path] + values['args']
+        t1 = time.time()
         process = subprocess.Popen(test_args,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
         stdout, stderr = process.communicate()
-        self.check_test_results(values, stdout.decode('utf-8'),
-                                stderr.decode('utf-8'), process.returncode)
+        execution_time = time.time() - t1
+        if 'timeout' in values and execution_time > values['timeout']:
+            self.print_test_failed(f"Test timed out : {execution_time}s > {values['timeout']}s")
+        else:
+            self.check_test_results(values, stdout.decode('utf-8'),
+                                    stderr.decode('utf-8'), process.returncode)
         if 'post' in values:
             self.run_pre_post_command(values['post'])
 

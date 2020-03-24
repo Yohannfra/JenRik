@@ -163,6 +163,7 @@ class Tester:
 
 
     def apply_pipe(self, output, pipe):
+        """ apply a pipe command on a given output """
         if pipe == "":
             return output
         output = os.popen('echo ' + shlex.quote(output.rstrip("\n")) + ' ' + pipe).read()

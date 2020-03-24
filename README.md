@@ -1,6 +1,6 @@
 # JenRik
 
-JenRik is a simple but powerfull testing tool.
+JenRik is a simple but powerful testing tool.
 
 The main idea was to write a generic binary testing tool.\
 JenRik simply parse a [toml](https://github.com/toml-lang/toml)
@@ -37,10 +37,10 @@ else:
     print(sys.argv[1])
 ```
 
-##### First we need to init a test file for our my_prog.py
+##### First we need to initialize a test file for our my_prog.py
 
 ```bash
-$ jenerik init ./my_prog.py # you must give the path and not just the binary name
+$ jenerik init ./my_prog.py
 ```
 
 It will create a *test_my_prog.toml* file with this content:
@@ -79,31 +79,31 @@ stdout="Hello\n"
 stderr=""
 ```
 
-⚠ Each test require at least the args and status values !\
-stdout and stderr can be omitted.
+⚠ **Each test requires at least the args and status values !**
 
-There are a few other available commands:
-- ***pre*** : run a shell command before executing the test
-- ***post*** : run a shell command after executing the test
-- ***stderr_file*** : compare your program stderr with the content of a given file
-- ***stdout_file*** : compare your program stdout with the content of a given file
-- ***pipe_stdout*** : redirect your program stdout to a specified shell command before checking it
-- ***pipe_stderr*** : redirect your program stderr to a specified shell command before checking it
-- ***should_fail*** : make the test sucess if it fails
-- ***timeout*** : make the test fail if it times out (the time is given in seconds)
+There are many other available commands:
+- **pre** : run a shell command before executing the test
+- **post** : run a shell command after executing the test
+- **stderr_file** : compare your program stderr with the content of a given file
+- **stdout_file** : compare your program stdout with the content of a given file
+- **pipe_stdout** : redirect your program stdout to a specified shell command before checking it
+- **pipe_stderr** : redirect your program stderr to a specified shell command before checking it
+- **should_fail** : make the test success if it fails
+- **timeout** : make the test fail if it times out (the time is given in seconds)
 
-***pre*** is usefull if you need to prepare a file needed by your programm for a test\
-***post*** is mainly usefull to cleanup after a test\
-***stderr_file*** and ***stdout_file*** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.
+**pre** is usefull if you need to prepare a file needed by your programm for a test\
+**post** is mainly usefull to cleanup after a test\
+**stderr_file** and **stdout_file** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.
+**should_fail** is used if you want a test fail to be its success
 
-⚠ Don't forget that the paths are all relatives to the test file.
+⚠ **Don't forget that the paths are all relatives to the test file.**
 
 If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
 
 Here is a quick example of how to use all availables commands
 
 ```toml
-# args 
+# args
 args = []
 args = ["-h"]
 args = ["1", "2", "3"]

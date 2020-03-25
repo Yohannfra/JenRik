@@ -217,6 +217,7 @@ class Tester:
         try:
             stdout, stderr = process.communicate(timeout=values.get('timeout', None))
         except subprocess.TimeoutExpired:
+            process.kill()
             self.print_test_failed(f"Test timed out : terminated after {values['timeout']}s")
         else:
             self.check_test_results(values, stdout.decode('utf-8'),

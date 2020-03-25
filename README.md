@@ -173,7 +173,7 @@ JenRik test_JenRik.toml
 - [x] the possibility to diff the output with an existing file
 - [x] Add a pre and a post command
 - [x] Add pipe_stdout and pipe_stderr
-- [x] Add a timout feature
+- [x] Add a timeout feature
 
 ## Licence
     This project is licensed under the terms of the MIT license.

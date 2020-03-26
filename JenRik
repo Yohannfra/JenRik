@@ -57,7 +57,7 @@ def init_file(fp):
 
 def check_binary_validity(binary_path, relative_path):
     """ Check if the binary path is a valid executable file """
-    if os.path.exists(binary_path):
+    if os.path.exists(relative_path + binary_path):
         if not os.access(relative_path + binary_path, os.X_OK):
             sys.exit(f"{binary_path} : is not executable")
         elif os.path.isdir(relative_path + binary_path):

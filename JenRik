@@ -211,14 +211,14 @@ class Tester:
         if 'pre' in values:
             self.run_pre_post_command(values['pre'])
         test_args = [self.binary_path] + values['args']
-        t1 = time.time()
         process = subprocess.Popen(test_args,
                                    stdout=subprocess.PIPE,
                                    stderr=subprocess.PIPE)
-        stdout, stderr = process.communicate()
-        execution_time = time.time() - t1
-        if 'timeout' in values and execution_time > values['timeout']:
-            self.print_test_failed(f"Test timed out : {execution_time}s > {values['timeout']}s")
+        try:
+            stdout, stderr = process.communicate(timeout=values.get('timeout', None))
+        except subprocess.TimeoutExpired:
+            process.kill()
+            self.print_test_failed(f"Test timed out : terminated after {values['timeout']}s")
         else:
             self.check_test_results(values, stdout.decode('utf-8'),
                                     stderr.decode('utf-8'), process.returncode)

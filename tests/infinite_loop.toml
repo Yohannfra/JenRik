@@ -1,0 +1,5 @@
+binary_path = "./infinite_loop.sh"
+
+[invalid_test]
+args = []
+status = 0

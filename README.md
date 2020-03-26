@@ -90,7 +90,7 @@ There are many other available commands:
 - **pipe_stdout** : redirect your program stdout to a specified shell command before checking it
 - **pipe_stderr** : redirect your program stderr to a specified shell command before checking it
 - **should_fail** : make the test success if it fails
-- **timeout** : make the test fail if it times out (the time is given in seconds)
+- **timeout** : make the test fail if it times out, after killing it (SIGTERM) (the time is given in seconds)
 
 **pre** is usefull if you need to prepare a file needed by your programm for a test\
 **post** is mainly usefull to cleanup after a test\

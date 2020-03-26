@@ -96,6 +96,12 @@ status = 1
 timeout= 0
 should_fail = true
 
+[test_timeout_loop]
+args = ["tests/infinite_loop.toml"]
+status = 0
+timeout = 0.5
+should_fail = true
+
 [test_status_should_fail]
 args = []
 status = 0

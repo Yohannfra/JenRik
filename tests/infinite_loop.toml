@@ -1,4 +1,4 @@
-binary_path = "./tests/infinite_loop.sh"
+binary_path = "./infinite_loop.sh"
 
 [invalid_test]
 args = []

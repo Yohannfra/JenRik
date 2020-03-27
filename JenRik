@@ -241,6 +241,7 @@ class Tester:
             print(f"{test} : ", end='')
             self.run_test(self.test_suite[test])
         self.print_summary()
+        return self.count_failed_tests
 
 
 def main(argc, argv):
@@ -257,7 +258,7 @@ def main(argc, argv):
         binary_path, test_suite = check_test_file_validity(content, argv[1], relative_path)
         binary_path = binary_path.replace('././', './')
         tester = Tester(binary_path, test_suite, relative_path)
-        tester.launch()
+        exit(tester.launch())
 
 
 if __name__ == '__main__':

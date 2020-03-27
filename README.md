@@ -162,6 +162,11 @@ Summary ./my_prog.py: 2 tests ran
 0 : KO
 ```
 
+### Exit status
+
+If a parsing error or a configuration error occurs then the exit status is 1\
+Otherwise the exit status is the number of failed tests
+
 ## Tests
 
 Jenrik tests itself.

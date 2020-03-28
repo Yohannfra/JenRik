@@ -11,8 +11,7 @@ file containing the tests and run them.
 #### Dependencies:
 The dependencies are the python parser for toml and termcolor. Install both with:
 ```
-pip install toml
-pip install termcolor
+pip install -r requirements.txt
 ```
 
 #### Installation from sources:

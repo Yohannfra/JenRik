@@ -168,9 +168,15 @@ Otherwise the exit status is the number of failed tests
 
 ## Tests
 
-Jenrik tests itself.
+JenRik tests itself.
 ```
 JenRik test_JenRik.toml
+```
+
+You can also run JenRik tests within a docker
+```
+$ docker build -t image_jenrik .
+$ docker run image_jenrik:latest
 ```
 
 ## Roadmap

@@ -1,0 +1,8 @@
+binary_path = "./print_stdin.py"
+
+[test_stdin]
+args = []
+status = 0
+stdin = ["Hello", "world"]
+stdout = "Hello\nworld\n"
+timeout = 1

@@ -90,6 +90,7 @@ There are many other available commands:
 - **pipe_stderr** : redirect your program stderr to a specified shell command before checking it
 - **should_fail** : make the test success if it fails
 - **timeout** : make the test fail if it times out, after killing it (SIGTERM) (the time is given in seconds)
+- **stdin** : write in the stdin of the process
 
 **pre** is usefull if you need to prepare a file needed by your programm for a test\
 **post** is mainly usefull to cleanup after a test\
@@ -141,6 +142,8 @@ should_fail = true
 # timeout (in seconds)
 timeout = 0.4
 
+# stdin
+stdin = ["Hello", "World"]
 ```
 
 See [Usage](#Usage) to run the tests

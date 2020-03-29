@@ -106,3 +106,7 @@ should_fail = true
 args = []
 status = 0
 should_fail = true
+
+[test_stdin]
+args = ["tests/test_stdin.toml"]
+status = 0

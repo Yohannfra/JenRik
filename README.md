@@ -99,7 +99,7 @@ There are many other available commands:
 
 ⚠ **Don't forget that the paths are all relatives to the test file.**
 
-If you want more examples on how to write tests you should see this [file](test_JenRik.toml)
+If you want more examples on how to write tests you should see this [file](test_jenrik.toml)
 
 Here is a quick example of how to use all availables commands
 
@@ -173,7 +173,7 @@ Otherwise the exit status is the number of failed tests
 
 JenRik tests itself.
 ```
-JenRik test_JenRik.toml
+jenrik test_jenrik.toml
 ```
 
 You can also run JenRik tests within a docker

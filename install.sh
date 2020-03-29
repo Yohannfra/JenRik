@@ -5,5 +5,5 @@ if (( $EUID != 0 )); then
     exit
 fi
 
-sudo cp ./JenRik /usr/bin/jenerik
+sudo cp ./jenrik /usr/bin/jenerik
 echo "Done !"

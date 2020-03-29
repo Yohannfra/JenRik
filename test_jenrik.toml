@@ -1,4 +1,4 @@
-binary_path = "./JenRik"
+binary_path = "./jenrik"
 
 [invalid_arg]
 args = ["-h"]
@@ -22,9 +22,9 @@ args = ["toito.toml"]
 stderr = "Could not open file toito.toml\n"
 status = 1
 
-[overwrite_init_test_JenRik_toml]
-args = ["init", "JenRik"]
-stderr = "test_JenRik.toml already exists, can't init the file\n"
+[overwrite_init_test_jenrik_toml]
+args = ["init", "jenrik"]
+stderr = "test_jenrik.toml already exists, can't init the file\n"
 status = 1
 
 [test_working_init]
@@ -71,7 +71,7 @@ stderr = "tests/README.md : file not found\n"
 args = []
 status = 1
 pipe_stdout = "| grep \"USAGE\""
-stdout = "USAGE : ./JenRik file.jrk | init path_to_binary\n"
+stdout = "USAGE : ./jenrik file.jrk | init path_to_binary\n"
 
 [test_pipe_two_pipes_stdout]
 args = []

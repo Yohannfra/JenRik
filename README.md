@@ -2,7 +2,7 @@
 
 JenRik is a simple but powerful testing tool.
 
-[![Actions Status](https://github.com/{Yohannfra}/{JenRik}/workflows/JenRik/badge.svg)](https://github.com/Yohannfra/JenRik/actions)
+![](https://github.com/Yohannfra/JenRik/workflows/JenRik/badge.svg)
 
 The main idea was to write a generic binary testing tool.\
 JenRik simply parse a [toml](https://github.com/toml-lang/toml)

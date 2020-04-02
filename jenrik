@@ -72,7 +72,7 @@ def check_tests_validity(test_name, values):
         sys.exit(f"Invalid test : '{test_name} {values}'")
     known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post',
                         'stdout_file', 'stderr_file', 'pipe_stdout',
-                        'pipe_stderr', 'timeout', 'should_fail', 'stdin']
+                        'pipe_stderr', 'timeout', 'should_fail', 'stdin', 'env']
     has_args = 'args' in values.keys()
     has_status = 'status' in values.keys()
 
@@ -96,6 +96,8 @@ def check_tests_validity(test_name, values):
         sys.exit(f"{test_name}: should_fail value must be a boolean")
     if 'stdin' in values.keys() and type(values['stdin']) != list:
         sys.exit(f"{test_name}: stdin value must be an array")
+    if 'env' in values.keys() and type(values['env']) != dict:
+        sys.exit(f"{test_name}: env value must be a dictionnary")
 
 
 def check_test_file_validity(content, fp, relative_path):
@@ -212,9 +214,14 @@ class Tester:
 
         if 'pre' in values:
             self.run_pre_post_command(values['pre'])
+        my_env = os.environ.copy()
+        if 'env' in values:
+            for v in values['env'].keys():
+                my_env[v] = values['env'][v]
         test_args = [self.binary_path] + values['args']
         process = subprocess.Popen(test_args, stdin=subprocess.PIPE,
-                       stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                       stdout=subprocess.PIPE, stderr=subprocess.PIPE,
+                       env=my_env)
         try:
             if 'stdin' in values :
                 for v in values['stdin']:

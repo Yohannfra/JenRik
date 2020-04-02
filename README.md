@@ -91,6 +91,7 @@ There are many other available commands:
 - **should_fail** : make the test success if it fails
 - **timeout** : make the test fail if it times out, after killing it (SIGTERM) (the time is given in seconds)
 - **stdin** : write in the stdin of the process
+- **env** : change environment variable(s)
 
 **pre** is usefull if you need to prepare a file needed by your programm for a test\
 **post** is mainly usefull to cleanup after a test\
@@ -144,6 +145,10 @@ timeout = 0.4
 
 # stdin
 stdin = ["Hello", "World"]
+
+# env
+env.USER = "toto"
+env.TERM = "xterm"
 ```
 
 See [Usage](#Usage) to run the tests

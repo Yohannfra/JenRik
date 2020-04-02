@@ -1,0 +1,7 @@
+binary_path = "echo_user.sh"
+
+[test]
+args = []
+status = 0
+stdout="jenerik\n"
+env.USER = "jenerik"

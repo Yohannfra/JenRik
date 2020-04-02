@@ -91,12 +91,14 @@ There are many other available commands:
 - **should_fail** : make the test success if it fails
 - **timeout** : make the test fail if it times out, after killing it (SIGTERM) (the time is given in seconds)
 - **stdin** : write in the stdin of the process
-- **env** : change environment variable(s)
+- **env** : change environment variable(s) (replace the value with the given one)
+- **add_env** : change environment variable(s) (append the given value to environment value)
 
 **pre** is usefull if you need to prepare a file needed by your programm for a test\
 **post** is mainly usefull to cleanup after a test\
 **stderr_file** and **stdout_file** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.
 **should_fail** is used if you want a test fail to be its success
+**add_env** is mainly used for environment variables like PATH (when you want to append a value to the existing one)
 
 ⚠ **Don't forget that the paths are all relatives to the test file.**
 
@@ -149,6 +151,9 @@ stdin = ["Hello", "World"]
 # env
 env.USER = "toto"
 env.TERM = "xterm"
+
+# add_env
+add_env.PATH= ":~/.my_folder"
 ```
 
 See [Usage](#Usage) to run the tests

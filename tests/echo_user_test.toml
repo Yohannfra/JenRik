@@ -5,3 +5,10 @@ args = []
 status = 0
 stdout="jenerik\n"
 env.USER = "jenerik"
+
+[test_with_add_env]
+args = []
+status = 0
+stdout="jenerik;toto\n"
+env.USER = "jenerik"
+add_env.USER = ";toto"

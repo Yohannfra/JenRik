@@ -72,7 +72,7 @@ def check_tests_validity(test_name, values):
         sys.exit(f"Invalid test : '{test_name} {values}'")
     known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post',
                         'stdout_file', 'stderr_file', 'pipe_stdout',
-                        'pipe_stderr', 'timeout', 'should_fail', 'stdin', 'env']
+                        'pipe_stderr', 'timeout', 'should_fail', 'stdin', 'env', 'add_env']
     has_args = 'args' in values.keys()
     has_status = 'status' in values.keys()
 
@@ -98,6 +98,8 @@ def check_tests_validity(test_name, values):
         sys.exit(f"{test_name}: stdin value must be an array")
     if 'env' in values.keys() and type(values['env']) != dict:
         sys.exit(f"{test_name}: env value must be a dictionnary")
+    if 'add_env' in values.keys() and type(values['add_env']) != dict:
+        sys.exit(f"{test_name}: add_env value must be a dictionnary")
 
 
 def check_test_file_validity(content, fp, relative_path):
@@ -208,16 +210,25 @@ class Tester:
                 if c != "" and type(command) == str:
                     os.system(c)
 
+
+    def fill_env(self, values):
+        my_env = os.environ.copy()
+        if 'env' in values:
+            for v in values['env'].keys():
+                my_env[v] = values['env'][v]
+        if 'add_env' in values:
+            for v in values['add_env'].keys():
+                my_env[v] = my_env[v] + values['add_env'][v]
+        return my_env
+
+
     def run_test(self, values):
         """ run the test in a subprocess """
         self.count_tests += 1
 
         if 'pre' in values:
             self.run_pre_post_command(values['pre'])
-        my_env = os.environ.copy()
-        if 'env' in values:
-            for v in values['env'].keys():
-                my_env[v] = values['env'][v]
+        my_env = self.fill_env(values)
         test_args = [self.binary_path] + values['args']
         process = subprocess.Popen(test_args, stdin=subprocess.PIPE,
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,

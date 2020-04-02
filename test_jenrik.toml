@@ -114,3 +114,7 @@ status = 0
 [test_env]
 args = ["tests/echo_user_test.toml"]
 status = 0
+
+[test_bad_env_values]
+args = ["tests/test_bad_types.toml"]
+status = 1

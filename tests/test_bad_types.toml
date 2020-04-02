@@ -1,0 +1,6 @@
+binary_path = "../jenrik"
+
+[invalid_env]
+args = ["-h"]
+status = 1
+env = 123

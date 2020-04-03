@@ -2,6 +2,8 @@
 
 JenRik is a simple but powerful testing tool.
 
+![](https://github.com/Yohannfra/JenRik/workflows/JenRik/badge.svg)
+
 The main idea was to write a generic binary testing tool.\
 JenRik simply parse a [toml](https://github.com/toml-lang/toml)
 file containing the tests and run them.

@@ -8,6 +8,27 @@ from termcolor import colored
 import shlex
 import time
 
+TESTS_KEYS = [
+    {'name' : 'args', 'type': [list]},
+    {'name' : 'status', 'type': [int]},
+    {'name' : 'stdout', 'type': [str]},
+    {'name' : 'stderr', 'type': [str]},
+    {'name' : 'pre', 'type': [str, list]},
+    {'name' : 'post', 'type': [str, list]},
+    {'name' : 'stdout_file', 'type': [str]},
+    {'name' : 'stderr_file', 'type': [str]},
+    {'name' : 'pipe_stdout', 'type': [str]},
+    {'name' : 'pipe_stderr', 'type': [str]},
+    {'name' : 'timeout', 'type': [int, float]},
+    {'name' : 'should_fail', 'type': [bool]},
+    {'name' : 'stdin', 'type': [list]},
+    {'name' : 'env', 'type': [dict]},
+    {'name' : 'add_env', 'type': [dict]}
+]
+
+REQUIERED_KEYS = ['args', 'status']
+
+INCOMPATIBLES_KEYS = [('stdout', 'stdout_file'), ('stderr', 'stderr_file')]
 
 def print_help(binary_name):
     """ Print a basic help showing how to use Jenerik """
@@ -66,40 +87,36 @@ def check_binary_validity(binary_path, relative_path):
         sys.exit(f"{binary_path} : file not found")
 
 
+def check_values_validities(test_name, values):
+    """ check if all keys values have the good type """
+    for key in TESTS_KEYS:
+        if key['name'] not in values.keys():
+            continue
+        good_type = False
+        for t in key['type']:
+            if type(values[key['name']]) == t:
+                good_type = True
+                break
+        if good_type == False:
+            sys.exit(f"{test_name}: {key['name']} value type must be in {key['type']}")
+
+    for key_pair in INCOMPATIBLES_KEYS:
+        if key_pair[0] in values.keys() and key_pair[1] in values.keys():
+            sys.exit(f"{test_name}: Incompatible keys, '{key_pair[0]}' and '{key_pair[1]}'")
+
+
 def check_tests_validity(test_name, values):
     """ Check if all the fieds of the test are known and are valids."""
     if type(values) != dict:
         sys.exit(f"Invalid test : '{test_name} {values}'")
-    known_tests_keys = ['args', 'status', 'stdout', 'stderr', 'pre', 'post',
-                        'stdout_file', 'stderr_file', 'pipe_stdout',
-                        'pipe_stderr', 'timeout', 'should_fail', 'stdin', 'env', 'add_env']
-    has_args = 'args' in values.keys()
-    has_status = 'status' in values.keys()
+    for key in REQUIERED_KEYS:
+        if key not in values.keys():
+            sys.exit(test_name + ": Missing field : " + key)
 
-    if has_args == False or has_status == False:
-        sys.exit(test_name + ": Missing field : " + ("'args'" * (not has_args)) +
-                 (" and " * (not has_args and not has_status)) +
-                 ("'status'" * (not has_status)))
     for key in values:
-        if key not in known_tests_keys:
+        if key not in [d['name'] for d in TESTS_KEYS]:
             sys.exit(f"{test_name}: Unknown key : {key}")
-
-    if 'stderr' in values.keys() and 'stderr_file' in values.keys():
-        sys.exit(
-            f"{test_name}: Duplicated stderr keys, you can\'t use both 'stderr' and 'stderr_file' for a test")
-    if 'stdout' in values.keys() and 'stdout_file' in values.keys():
-        sys.exit(
-            f"{test_name}: Duplicated stdout keys, you can\'t use both 'stdout' and 'stdout_file' for a test")
-    if 'timeout' in values.keys() and type(values['timeout']) != float and type(values['timeout']) != int:
-        sys.exit(f"{test_name}: timeout value must be a float or an int")
-    if 'should_fail' in values.keys() and values['should_fail'] != 1 and values['should_fail'] != 0:
-        sys.exit(f"{test_name}: should_fail value must be a boolean")
-    if 'stdin' in values.keys() and type(values['stdin']) != list:
-        sys.exit(f"{test_name}: stdin value must be an array")
-    if 'env' in values.keys() and type(values['env']) != dict:
-        sys.exit(f"{test_name}: env value must be a dictionnary")
-    if 'add_env' in values.keys() and type(values['add_env']) != dict:
-        sys.exit(f"{test_name}: add_env value must be a dictionnary")
+    check_values_validities(test_name, values)
 
 
 def check_test_file_validity(content, fp, relative_path):
@@ -113,7 +130,6 @@ def check_test_file_validity(content, fp, relative_path):
             check_binary_validity(binary_path, relative_path)
         else:
             check_tests_validity(key, content[key])
-            # If we arrived here then the test is valid
             test_suite[key] = content[key]
 
     if binary_path == "":

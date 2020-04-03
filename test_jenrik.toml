@@ -50,12 +50,12 @@ stderr = "invalid_test: Unknown key : toto\n"
 [duplicate_stdout]
 args = ["tests/duplicate_stdout.toml"]
 status = 1
-stderr = "invalid_test: Duplicated stdout keys, you can't use both 'stdout' and 'stdout_file' for a test\n"
+stderr = "invalid_test: Incompatible keys, 'stdout' and 'stdout_file'\n"
 
 [duplicate_stderr]
 args = ["tests/duplicate_stderr.toml"]
 status = 1
-stderr = "invalid_test: Duplicated stderr keys, you can't use both 'stderr' and 'stderr_file' for a test\n"
+stderr = "invalid_test: Incompatible keys, 'stderr' and 'stderr_file'\n"
 
 [bad_test]
 args = ["tests/invalid_test.toml"]

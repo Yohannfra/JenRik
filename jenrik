@@ -179,7 +179,7 @@ class Tester:
             sys.exit(f"{output_file} : could not open and read file")
         if output != fc:
             self.print_test_failed(f"Invalid {output_name}, "
-                                   f"expected '{fc}' but got '{output}'")
+                                   f"expected '{fc.encode()}' but got '{output.encode()}'")
             return True
         return False
 
@@ -205,11 +205,11 @@ class Tester:
         elif 'stdout' in values and values['stdout'] != "" \
                 and values['stdout'] != stdout:
             self.print_test_failed("Invalid stdout, "
-                                   f"expected {values['stdout'].encode('utf-8')} but got {stdout.encode('utf-8')}")
+                                   f"expected {values['stdout'].encode()} but got {stdout.encode()}")
         elif 'stderr' in values and values['stderr'] != "" \
                 and values['stderr'] != stderr:
             self.print_test_failed("Invalid stderr, "
-                                   f"expected {values['stderr'].encode('utf-8')} but got {stderr.encode('utf-8')}")
+                                   f"expected {values['stderr'].encode()} but got {stderr.encode()}")
         elif 'stdout_file' in values and self.comp_output_file(values['stdout_file'], stdout, 'stdout'):
             pass
         elif 'stderr_file' in values and self.comp_output_file(values['stderr_file'], stderr, 'stderr'):
@@ -252,7 +252,7 @@ class Tester:
         try:
             if 'stdin' in values :
                 for v in values['stdin']:
-                    process.stdin.write((v + "\n").encode('utf-8'))
+                    process.stdin.write((v + "\n").encode())
             stdout, stderr = process.communicate(timeout=values.get('timeout', None))
             if 'stdin' in values :
                 process.stdin.close()

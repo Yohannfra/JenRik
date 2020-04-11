@@ -14,12 +14,12 @@ status = 1
 
 [invalid_test_file]
 args = ["toito"]
-stderr = "You must provide valid toml file\n"
+stderr = "toito : file not found\n"
 status = 1
 
 [invalid_test_file_but_toml]
 args = ["toito.toml"]
-stderr = "Could not open file toito.toml\n"
+stderr = "toito.toml : file not found\n"
 status = 1
 
 [overwrite_init_test_jenrik_toml]

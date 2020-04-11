@@ -177,11 +177,7 @@ class Tester:
         fc = get_file_content(output_file)
         if output != fc:
             self.print_test_failed(f"Invalid {output_name}, "
-<<<<<<< Updated upstream
                                    f"expected '{fc}' but got '{output}'")
-=======
-                       f"expected '{fc.encode()}' but got '{output.encode()}'")
->>>>>>> Stashed changes
             return True
         return False
 

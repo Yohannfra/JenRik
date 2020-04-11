@@ -93,6 +93,7 @@ There are many other available commands:
 - **should_fail** : make the test success if it fails
 - **timeout** : make the test fail if it times out, after killing it (SIGTERM) (the time is given in seconds)
 - **stdin** : write in the stdin of the process
+- **stdin_file** : write in the stdin of the process from the content of a file
 - **env** : change environment variable(s) (replace the value with the given one)
 - **add_env** : change environment variable(s) (append the given value to environment value)
 
@@ -149,6 +150,9 @@ timeout = 0.4
 
 # stdin
 stdin = ["Hello", "World"]
+
+# stdin_file
+stdin_file = "my_stdin.txt"
 
 # env
 env.USER = "toto"

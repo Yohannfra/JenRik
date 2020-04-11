@@ -6,3 +6,10 @@ status = 0
 stdin = ["Hello", "world"]
 stdout = "Hello\nworld\n"
 timeout = 1
+
+[test_stdin_file]
+args = []
+status = 0
+stdin_file = "file_to_test_stdin.txt"
+stdout = "Hello\nworld\n1\n2\n3\n\n"
+timeout = 1

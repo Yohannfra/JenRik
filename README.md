@@ -42,7 +42,7 @@ else:
 ##### First we need to initialize a test file for our my_prog.py
 
 ```bash
-$ jenerik init ./my_prog.py
+$ jenrik init ./my_prog.py
 ```
 
 It will create a *test_my_prog.toml* file with this content:
@@ -163,7 +163,7 @@ See [Usage](#Usage) to run the tests
 ## Usage
 Once you have written the test file you just have to :
 ```
-jenerik test_my_prog.toml
+jenrik test_my_prog.toml
 ```
 
 The output will look like that

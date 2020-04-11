@@ -22,33 +22,38 @@ TESTS_KEYS = [
     {'name' : 'timeout', 'type': [int, float]},
     {'name' : 'should_fail', 'type': [bool]},
     {'name' : 'stdin', 'type': [list]},
+    {'name' : 'stdin_file', 'type': [str]},
     {'name' : 'env', 'type': [dict]},
     {'name' : 'add_env', 'type': [dict]}
 ]
 
 REQUIERED_KEYS = ['args', 'status']
 
-INCOMPATIBLES_KEYS = [('stdout', 'stdout_file'), ('stderr', 'stderr_file')]
+INCOMPATIBLES_KEYS = [('stdout', 'stdout_file'),
+                      ('stderr', 'stderr_file'),
+                      ('stdin', 'stdin_file')]
 
 def print_help(binary_name):
     """ Print a basic help showing how to use Jenerik """
     print(f"USAGE : {binary_name} file.jrk | init path_to_binary")
     print("\tinit\tcreate a basic test file for the given binary")
 
-
-def open_file(fp):
-    """ Open the toml file and parse it """
-    if not fp.endswith(".toml"):
-        sys.exit("You must provide valid toml file")
+def get_file_content(fp):
+    """ open a file and return its content """
+    if os.path.exists(fp):
+        if not os.access(fp, os.R_OK):
+            sys.exit(f"{fp} : is not readable")
+        elif os.path.isdir(fp):
+            sys.exit(f"{fp} : is a directory")
+    else:
+        sys.exit(f"{fp} : file not found")
     try:
         f = open(fp, 'r')
-        c = f.read()
+        fc = f.read()
+        f.close()
     except:
-        sys.exit(f"Could not open file {fp}")
-    content = toml.loads(c)  # Parse the toml file
-    f.close()
-    return content
-
+        sys.exit(f"{fp} : could not open and read file")
+    return fc
 
 def init_file(fp):
     """ Create a default test file """
@@ -149,11 +154,13 @@ class Tester:
         self.count_failed_tests = 0
         self.relative_path = relative_path
 
+
     def print_test_sucess(self):
         """ print a message if test success """
         if self.test_should_fail == 0:
             return self.print_test_failed("Test should have failed")
         print(colored('OK', 'green'))
+
 
     def print_test_failed(self, e):
         """ print a message if test fails """
@@ -163,23 +170,18 @@ class Tester:
         print(colored('KO', 'red'), end=" : ")
         print(e)
 
+
     def comp_output_file(self, output_file, output, output_name):
         """ compare an output with a given file """
         output_file = (self.relative_path + output_file).replace('/./', '/')
-        if os.path.exists(output_file):
-            if not os.access(output_file, os.R_OK):
-                sys.exit(f"{output_file} : is not readable")
-        else:
-            sys.exit(f"{output_file} : file not found")
-        try:
-            f = open(output_file, 'r')
-            fc = f.read()
-            f.close()
-        except:
-            sys.exit(f"{output_file} : could not open and read file")
+        fc = get_file_content(output_file)
         if output != fc:
             self.print_test_failed(f"Invalid {output_name}, "
+<<<<<<< Updated upstream
                                    f"expected '{fc}' but got '{output}'")
+=======
+                       f"expected '{fc.encode()}' but got '{output.encode()}'")
+>>>>>>> Stashed changes
             return True
         return False
 
@@ -238,6 +240,17 @@ class Tester:
         return my_env
 
 
+    def fill_stdin(self, values, process):
+        """ fill the process stdin """
+        if 'stdin' in values:
+            for v in values['stdin']:
+                process.stdin.write((v + "\n").encode())
+        elif 'stdin_file' in values:
+            input_file = (self.relative_path + values['stdin_file']).replace('/./', '/')
+            fc = get_file_content(input_file)
+            for line in fc.split('\n'):
+                process.stdin.write((line + "\n").encode())
+
     def run_test(self, values):
         """ run the test in a subprocess """
         self.count_tests += 1
@@ -250,9 +263,8 @@ class Tester:
                        stdout=subprocess.PIPE, stderr=subprocess.PIPE,
                        env=my_env)
         try:
-            if 'stdin' in values :
-                for v in values['stdin']:
-                    process.stdin.write((v + "\n").encode('utf-8'))
+            if 'stdin' in values or 'stdin_file' in values:
+                self.fill_stdin(values, process)
             stdout, stderr = process.communicate(timeout=values.get('timeout', None))
             if 'stdin' in values :
                 process.stdin.close()
@@ -291,7 +303,8 @@ def main(argc, argv):
     if argc == 3:
         init_file(argv[2])
     elif argc == 2:
-        content = open_file(argv[1])
+        file_content = get_file_content(argv[1])
+        content = toml.loads(file_content)  # Parse the toml file
         relative_path = "/".join(argv[1].split('/')[0:-1]) + '/'
         if '/' == relative_path and '/' not in argv[1]: # dirty but works
             relative_path = './'

@@ -96,12 +96,16 @@ There are many other available commands:
 - **stdin_file** : write in the stdin of the process from the content of a file
 - **env** : change environment variable(s) (replace the value with the given one)
 - **add_env** : change environment variable(s) (append the given value to environment value)
+- **repeat** : repeat the test x times
 
-**pre** is usefull if you need to prepare a file needed by your programm for a test\
-**post** is mainly usefull to cleanup after a test\
-**stderr_file** and **stdout_file** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.
-**should_fail** is used if you want a test fail to be its success
-**add_env** is mainly used for environment variables like PATH (when you want to append a value to the existing one)
+### Example of how to use some commands
+
+- **pre** is usefull if you need to prepare a file needed by your programm for a test
+- **post** is mainly usefull to cleanup after a test
+- **stderr_file** and **stdout_file** are usefull if the output of you program is on multiples lines or if it's a lot of text and you don't want it written in you test file.
+- **should_fail** is used if you want a test fail to be its success
+- **add_env** is mainly used for environment variables like PATH (when you want to append a value to the existing one)
+- **repeat** is super usefull if you want to test a proram that relies on some random data. It makes it easier to run many tests to check if it's always working
 
 ⚠ **Don't forget that the paths are all relatives to the test file.**
 

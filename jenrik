@@ -24,7 +24,8 @@ TESTS_KEYS = [
     {'name' : 'stdin', 'type': [list]},
     {'name' : 'stdin_file', 'type': [str]},
     {'name' : 'env', 'type': [dict]},
-    {'name' : 'add_env', 'type': [dict]}
+    {'name' : 'add_env', 'type': [dict]},
+    {'name' : 'repeat', 'type': [int]}
 ]
 
 REQUIERED_KEYS = ['args', 'status']
@@ -247,7 +248,7 @@ class Tester:
             for line in fc.split('\n'):
                 process.stdin.write((line + "\n").encode())
 
-    def run_test(self, values):
+    def run_test(self, values, test_name, repeat_count):
         """ run the test in a subprocess """
         self.count_tests += 1
 
@@ -272,6 +273,9 @@ class Tester:
                                     stderr.decode('utf-8'), process.returncode)
         if 'post' in values:
             self.run_pre_post_command(values['post'])
+        if 'repeat' in values and values['repeat'] - repeat_count > 0:
+            print(f" - Repeat {repeat_count + 1} {test_name}: " , end="")
+            self.run_test(values, test_name, repeat_count + 1)
 
     def print_summary(self):
         """ print a summary of the tests results """
@@ -287,7 +291,7 @@ class Tester:
             if 'should_fail' in self.test_suite[test].keys():
                 self.test_should_fail = self.test_suite[test]['should_fail']
             print(f"{test} : ", end='')
-            self.run_test(self.test_suite[test])
+            self.run_test(self.test_suite[test], test, 0)
         self.print_summary()
         return self.count_failed_tests
 

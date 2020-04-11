@@ -118,3 +118,8 @@ status = 0
 [test_bad_env_values]
 args = ["tests/test_bad_types.toml"]
 status = 1
+
+[test_repeat_5_times]
+args = []
+status = 1
+repeat = 5

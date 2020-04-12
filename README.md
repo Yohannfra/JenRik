@@ -164,6 +164,9 @@ env.TERM = "xterm"
 
 # add_env
 add_env.PATH= ":~/.my_folder"
+
+# repeat
+repeat = 12
 ```
 
 See [Usage](#Usage) to run the tests

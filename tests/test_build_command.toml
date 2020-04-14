@@ -1,0 +1,7 @@
+binary_path = "../jenrik"
+
+build_command = 12
+
+[testtoto]
+args = []
+status = 1

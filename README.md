@@ -187,6 +187,23 @@ Summary ./my_prog.py: 2 tests ran
 0 : KO
 ```
 
+
+### Build
+
+If you want to build your programm when calling jenrik you can use the **build_command** option.\
+It will run it before executing the tests. eg:
+
+```toml
+binary_path = "./my_program"
+
+build_command = "make"
+
+[test_example]
+args = []
+status = 1
+...
+```
+
 ### Exit status
 
 If a parsing error or a configuration error occurs then the exit status is 1\

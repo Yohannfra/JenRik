@@ -125,6 +125,11 @@ def check_tests_validity(test_name, values):
     check_values_validities(test_name, values)
 
 
+def run_build_command(build_command):
+    if type(build_command) != str:
+        sys.exit(f"build_command value must be a string")
+    os.system(build_command)
+
 def check_test_file_validity(content, fp, relative_path):
     """ Check if the toml test file is valid """
     binary_path = ""
@@ -134,6 +139,8 @@ def check_test_file_validity(content, fp, relative_path):
         if key == "binary_path":
             binary_path = content[key]
             check_binary_validity(binary_path, relative_path)
+        elif key == "build_command":
+            run_build_command(content[key])
         else:
             check_tests_validity(key, content[key])
             test_suite[key] = content[key]

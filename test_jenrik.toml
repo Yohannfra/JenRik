@@ -123,3 +123,8 @@ status = 1
 args = []
 status = 1
 repeat = 5
+
+[test_invalid_build_command]
+args = ["tests/test_build_command.toml"]
+status = 1
+stderr = "build_command value must be a string\n"

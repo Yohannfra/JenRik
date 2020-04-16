@@ -201,7 +201,7 @@ build_command = "make"
 [test_example]
 args = []
 status = 1
-...
+# ...
 ```
 
 ### Exit status

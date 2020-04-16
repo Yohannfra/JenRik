@@ -126,6 +126,7 @@ def check_tests_validity(test_name, values):
 
 
 def run_build_command(build_command):
+    """ run the build command """
     if type(build_command) != str:
         sys.exit(f"build_command value must be a string")
     os.system(build_command)

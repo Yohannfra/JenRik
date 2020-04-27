@@ -8,7 +8,7 @@ from termcolor import colored
 import shlex
 import time
 
-JENRIK_VERSION = "1.0.0"
+JENRIK_VERSION = "1.0"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},

@@ -222,11 +222,10 @@ $ docker build -t image_jenrik .
 $ docker run image_jenrik:latest
 ```
 
-## Roadmap
-- [x] the possibility to diff the output with an existing file
-- [x] Add a pre and a post command
-- [x] Add pipe_stdout and pipe_stderr
-- [x] Add a timeout feature
+## Current version
+```
+v 1.0.0
+```
 
 ## Licence
     This project is licensed under the terms of the MIT license.

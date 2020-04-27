@@ -8,6 +8,8 @@ from termcolor import colored
 import shlex
 import time
 
+JENRIK_VERSION = "1.0.0"
+
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
     {'name' : 'status', 'type': [int]},
@@ -37,7 +39,8 @@ INCOMPATIBLES_KEYS = [('stdout', 'stdout_file'),
 def print_help(binary_name):
     """ Print a basic help showing how to use Jenerik """
     print(f"USAGE : {binary_name} file.jrk | init path_to_binary")
-    print("\tinit\tcreate a basic test file for the given binary")
+    print("\tinit\t\tcreate a basic test file for the given binary")
+    print("\t--version\tprint version information and exit")
 
 def get_file_content(fp):
     """ open a file and return its content """
@@ -305,6 +308,9 @@ class Tester:
 
 
 def main(argc, argv):
+    if argc == 2 and argv[1] == '--version':
+        print(f"jenrik v{JENRIK_VERSION}")
+        exit(0)
     if argc == 1 or argc > 3 or argc == 3 and argv[1] != 'init':
         print_help(argv[0])
         exit(1)

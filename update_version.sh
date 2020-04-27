@@ -8,7 +8,7 @@
 current_version=$(grep version README.md -A 2 | grep "^v" | cut -d ' ' '-f2-')
 
 # The new_version is the current one + 0.1
-new_version=$(echo ${current_version} + 0.1 | bc)
+new_version=$(echo ${current_version} + 0.01 | bc)
 
 # Now we save it
 

@@ -41,6 +41,7 @@ def print_help(binary_name):
     print(f"USAGE : {binary_name} file.jrk | init path_to_binary")
     print("\tinit\t\tcreate a basic test file for the given binary")
     print("\t--version\tprint version information and exit")
+    print("\t--help\tprint this help and exit")
 
 def get_file_content(fp):
     """ open a file and return its content """
@@ -309,8 +310,9 @@ class Tester:
 
 def main(argc, argv):
     if argc == 2 and argv[1] == '--version':
-        print(f"jenrik v{JENRIK_VERSION}")
-        exit(0)
+        return print(f"jenrik v{JENRIK_VERSION}")
+    if argc == 2 and argv[1] == '--help':
+        return print_help(argv[0])
     if argc == 1 or argc > 3 or argc == 3 and argv[1] != 'init':
         print_help(argv[0])
         exit(1)

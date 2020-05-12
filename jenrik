@@ -4,11 +4,12 @@ import sys
 import toml
 import os
 import subprocess
-from termcolor import colored
+import colored
+from colored import stylize
 import shlex
 import time
 
-JENRIK_VERSION = "1.01"
+JENRIK_VERSION = "1.02"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
@@ -172,7 +173,7 @@ class Tester:
         """ print a message if test success """
         if self.test_should_fail == 0:
             return self.print_test_failed("Test should have failed")
-        print(colored('OK', 'green'))
+        print(stylize('OK', colored.fg('green')))
 
 
     def print_test_failed(self, e):
@@ -180,17 +181,36 @@ class Tester:
         if self.test_should_fail == 1:
             return self.print_test_sucess()
         self.count_failed_tests += 1
-        print(colored('KO', 'red'), end=" : ")
+        print(stylize('KO', colored.fg('red')), end=" : ")
         print(e)
 
+
+    def print_diff(self, t1, t2):
+        len1 = len(t1)
+        len2 = len(t2)
+        len_max = len1 if len1 > len2 else len2
+        print("-" * (len_max + 1))
+        print("Expected:")
+        print(f"'{t1}'")
+        print("But got:")
+        sys.stdout.write("'")
+        for i in range(len_max):
+            if i > len2 - 1:
+                sys.stdout.write(stylize(" ", colored.bg("red")))
+            elif i < len1 and t1[i] == t2[i]:
+                sys.stdout.write(t2[i])
+            else:
+                sys.stdout.write(stylize(t2[i], colored.fg('red')))
+        sys.stdout.write("'\n")
+        print("-" * (len_max + 1))
 
     def comp_output_file(self, output_file, output, output_name):
         """ compare an output with a given file """
         output_file = (self.relative_path + output_file).replace('/./', '/')
         fc = get_file_content(output_file)
         if output != fc:
-            self.print_test_failed(f"Invalid {output_name}, "
-                                   f"expected '{fc.encode()}' but got '{output.encode()}'")
+            self.print_test_failed(f"Invalid {output_name}")
+            self.print_diff(fc, output)
             return True
         return False
 
@@ -215,12 +235,12 @@ class Tester:
                                    f"expected {values['status']} but got {status}")
         elif 'stdout' in values and values['stdout'] != "" \
                 and values['stdout'] != stdout:
-            self.print_test_failed("Invalid stdout, "
-                                   f"expected {values['stdout'].encode()} but got {stdout.encode()}")
+            self.print_test_failed("Invalid stdout")
+            self.print_diff(values['stdout'], stdout)
         elif 'stderr' in values and values['stderr'] != "" \
                 and values['stderr'] != stderr:
-            self.print_test_failed("Invalid stderr, "
-                                   f"expected {values['stderr'].encode()} but got {stderr.encode()}")
+            self.print_test_failed("Invalid stderr")
+            self.print_diff(values['stderr'], stderr)
         elif 'stdout_file' in values and self.comp_output_file(values['stdout_file'], stdout, 'stdout'):
             pass
         elif 'stderr_file' in values and self.comp_output_file(values['stderr_file'], stderr, 'stderr'):
@@ -296,8 +316,8 @@ class Tester:
         """ print a summary of the tests results """
         count_success = self.count_tests - self.count_failed_tests
         print(f"\nSummary {self.binary_path}: {self.count_tests} tests ran")
-        print(f"{count_success} : {colored('OK', 'green')}")
-        print(f"{self.count_failed_tests} : {colored('KO', 'red')}")
+        print(f"{count_success} : {stylize('OK', colored.fg('green'))}")
+        print(f"{self.count_failed_tests} : {stylize('KO', colored.fg('red'))}")
 
     def launch(self):
         """ launch the tests on the test suite """

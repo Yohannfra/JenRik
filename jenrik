@@ -9,7 +9,7 @@ from colored import stylize
 import shlex
 import time
 
-JENRIK_VERSION = "1.02"
+JENRIK_VERSION = "1.03"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
@@ -37,12 +37,15 @@ INCOMPATIBLES_KEYS = [('stdout', 'stdout_file'),
                       ('stderr', 'stderr_file'),
                       ('stdin', 'stdin_file')]
 
+QUIET_MODE = False
+
 def print_help(binary_name):
     """ Print a basic help showing how to use Jenerik """
     print(f"USAGE : {binary_name} file.jrk | init path_to_binary")
     print("\tinit\t\tcreate a basic test file for the given binary")
     print("\t--version\tprint version information and exit")
     print("\t--help\tprint this help and exit")
+    print("\t--quiet, -q\trun in quiet mode (doesn't show the diffs")
 
 def get_file_content(fp):
     """ open a file and return its content """
@@ -186,6 +189,8 @@ class Tester:
 
 
     def print_diff(self, t1, t2):
+        if QUIET_MODE:
+            return
         len1 = len(t1)
         len2 = len(t2)
         len_max = len1 if len1 > len2 else len2
@@ -332,6 +337,11 @@ class Tester:
 
 
 def main(argc, argv):
+    global QUIET_MODE
+    if "-q" in argv or "--quiet" in argv:
+        QUIET_MODE = True
+        argv.remove("-q" if "-q" in argv else "--quiet")
+        argc -= 1
     if argc == 2 and argv[1] == '--version':
         return print(f"jenrik v{JENRIK_VERSION}")
     if argc == 2 and argv[1] == '--help':

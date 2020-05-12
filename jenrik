@@ -9,7 +9,7 @@ from colored import stylize
 import shlex
 import time
 
-JENRIK_VERSION = "1.03"
+JENRIK_VERSION = "1.04"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
@@ -201,7 +201,8 @@ class Tester:
         sys.stdout.write("'")
         for i in range(len_max):
             if i > len2 - 1:
-                sys.stdout.write(stylize(" ", colored.bg("red")))
+                # sys.stdout.write(stylize(" ", colored.bg("red")))
+                pass
             elif i < len1 and t1[i] == t2[i]:
                 sys.stdout.write(t2[i])
             else:

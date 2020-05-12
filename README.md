@@ -224,7 +224,7 @@ $ docker run image_jenrik:latest
 
 ## Current version
 ```
-v 1.03
+v 1.04
 ```
 
 ## Licence

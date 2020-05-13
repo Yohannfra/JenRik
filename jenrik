@@ -202,7 +202,7 @@ class Tester:
                 sys.stdout.write(t1[c])
             else:
                 sys.stdout.write(stylize(t1[c], colored.fg("green")))
-        sys.stdout.write("'")
+        sys.stdout.write("'\n")
         print("But got:")
         sys.stdout.write("'")
         for i in range(len_max):

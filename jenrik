@@ -8,9 +8,8 @@ import colored
 from colored import stylize
 import shlex
 import time
-import re
 
-JENRIK_VERSION = "1.06"
+JENRIK_VERSION = "1.07"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
@@ -359,8 +358,6 @@ def main(argc, argv):
     if argc == 3:
         init_file(argv[2])
     elif argc == 2:
-        if not re.findall(r"test_.*\.toml$", argv[1]):
-            sys.exit(f"{argv[1]}: Invalid test file")
         file_content = get_file_content(argv[1])
         content = toml.loads(file_content)  # Parse the toml file
         relative_path = "/".join(argv[1].split('/')[0:-1]) + '/'

@@ -45,7 +45,7 @@ def print_help(binary_name):
     print("\tinit\t\tcreate a basic test file for the given binary")
     print("\t--version\tprint version information and exit")
     print("\t--help\tprint this help and exit")
-    print("\t--quiet, -q\trun in quiet mode (doesn't show the diffs")
+    print("\t--quiet, -q\trun in quiet mode (doesn't show the diffs)")
 
 def get_file_content(fp):
     """ open a file and return its content """

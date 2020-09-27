@@ -13,7 +13,7 @@ new_version=$(echo ${current_version} + 0.01 | bc)
 # Now we save it
 
 # In README
-sed -i "s/${current_version}/${new_version}/" README.md
+sed -i ""  "s/${current_version}/${new_version}/" README.md
 
 # In jenrik
-sed -i "s/${current_version}/${new_version}/" jenrik
+sed -i ""  "s/${current_version}/${new_version}/" jenrik

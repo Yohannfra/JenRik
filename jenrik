@@ -9,7 +9,7 @@ from colored import stylize
 import shlex
 import time
 
-JENRIK_VERSION = "1.07"
+JENRIK_VERSION = "1.08"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
@@ -194,7 +194,7 @@ class Tester:
         len1 = len(t1)
         len2 = len(t2)
         len_max = len1 if len1 > len2 else len2
-        print("-" * (len_max + 1))
+        print("-" * 30)
         print("Expected:")
         sys.stdout.write("'")
         for c in range(len1):
@@ -213,7 +213,7 @@ class Tester:
             else:
                 sys.stdout.write(stylize(t2[i], colored.fg('red')))
         sys.stdout.write("'\n")
-        print("-" * (len_max + 1))
+        print("-" * 30)
 
     def comp_output_file(self, output_file, output, output_name):
         """ compare an output with a given file """

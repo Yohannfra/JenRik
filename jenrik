@@ -9,7 +9,7 @@ from colored import stylize
 import shlex
 import time
 
-JENRIK_VERSION = "1.08"
+JENRIK_VERSION = "1.09"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
@@ -341,6 +341,16 @@ class Tester:
         self.print_summary()
         return self.count_failed_tests
 
+def start_jenrik(fp):
+        file_content = get_file_content(fp)
+        content = toml.loads(file_content)  # Parse the toml file
+        relative_path = "/".join(fp.split('/')[0:-1]) + '/'
+        if '/' == relative_path and '/' not in fp: # dirty but works
+            relative_path = './'
+        binary_path, test_suite = check_test_file_validity(content, fp, relative_path)
+        binary_path = binary_path.replace('././', './')
+        tester = Tester(binary_path, test_suite, relative_path)
+        exit(tester.launch())
 
 def main(argc, argv):
     global QUIET_MODE
@@ -358,16 +368,7 @@ def main(argc, argv):
     if argc == 3:
         init_file(argv[2])
     elif argc == 2:
-        file_content = get_file_content(argv[1])
-        content = toml.loads(file_content)  # Parse the toml file
-        relative_path = "/".join(argv[1].split('/')[0:-1]) + '/'
-        if '/' == relative_path and '/' not in argv[1]: # dirty but works
-            relative_path = './'
-        binary_path, test_suite = check_test_file_validity(content, argv[1], relative_path)
-        binary_path = binary_path.replace('././', './')
-        tester = Tester(binary_path, test_suite, relative_path)
-        exit(tester.launch())
-
+        start_jenrik(argv[1])
 
 if __name__ == '__main__':
     main(len(sys.argv), sys.argv)

@@ -6,6 +6,7 @@ import (
 	"github.com/Yohannfra/JenRik/internal/tester"
 	"github.com/pelletier/go-toml"
 	"log"
+	"os"
 	"strings"
 )
 
@@ -65,7 +66,7 @@ func fixBinaryPath(binaryPath string, fp string) string {
 	splittedPath = splittedPath[:len(splittedPath)-1]
 
 	if len(splittedPath) == 0 { // from the same directory, nothing to do
-		return fp
+		return binaryPath
 	}
 	pathToToml := strings.Join(splittedPath, "/") + "/"
 	if pathToToml == "/" && !strings.Contains(fp, "/") {
@@ -78,7 +79,19 @@ func fixBinaryPath(binaryPath string, fp string) string {
 }
 
 func checkBinaryValidity(fp string) {
-	
+	if !utils.FileExists(fp) {
+		log.Fatalf("%s : file not found\n", fp)
+	}
+	fi, err := os.Stat(fp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	if fi.IsDir() {
+		log.Fatalf("%s : is a directory\n", fp)
+	}
+	if !(fi.Mode().Perm()&0111 != 0) { // if file is not executable
+		log.Fatalf("%s : is not executable\n", fp)
+	}
 }
 
 func LoadTestFile(fp string) tester.TestSuiteData {
@@ -106,6 +119,7 @@ func LoadTestFile(fp string) tester.TestSuiteData {
 	if testData.BinaryPath == "" {
 		log.Fatal("Could not find binary_path key in", fp)
 	}
+
 	testData.BinaryPath = fixBinaryPath(testData.BinaryPath, fp)
 	checkBinaryValidity(testData.BinaryPath)
 	return testData

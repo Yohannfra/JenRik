@@ -13,11 +13,11 @@ import (
 func main() {
 	argv := os.Args
 	argc := len(argv)
+	quietMode := false
 	log.SetFlags(0)
 
 	if utils.IsIn("-q", argv) || utils.IsIn("--quiet", argv) {
-		fmt.Println("Quiet mode")
-		// TODO
+		quietMode = true
 	} else if argc == 2 && utils.IsIn("--version", argv) {
 		fmt.Println(version.JenrikVersion)
 		os.Exit(0)
@@ -25,9 +25,9 @@ func main() {
 		help.PrintHelp(argv[0])
 		os.Exit(0)
 	} else if argc == 3 && argv[1] == "init" {
-		fmt.Println("Init")
+		jenrik.Init(argv[2])
 	} else if argc == 2 && argv[1] != "init" {
-		jenrik.Start(argv[1])
+		jenrik.Start(argv[1], quietMode)
 	} else {
 		help.PrintHelp(argv[0])
 		os.Exit(1)

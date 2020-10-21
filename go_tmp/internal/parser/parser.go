@@ -1,39 +1,42 @@
 package parser
 
 import (
-	"github.com/Yohannfra/JenRik/internal/utils" // is_in
+	"fmt"
+	"github.com/Yohannfra/JenRik/internal/utils"
+	"github.com/Yohannfra/JenRik/internal/tester"
 	"github.com/pelletier/go-toml"
 	"log"
+	"strings"
 )
 
-var TestsKeys = []string{
-	"args",
-	"status",
-	"stdout",
-	"stderr",
-	"pre",
-	"post",
-	"stdout_file",
-	"stderr_file",
-	"pipe_stdout",
-	"pipe_stderr",
-	"timeout",
-	"should_fail",
-	"stdin",
-	"stdin_file",
-	"env",
-	"add_env",
-	"repeat",
-}
-
 func CheckTestsValidity(testName string, testDict *toml.Tree) {
-	requieredKeys := []string{"status", "args"}
+	requiredKeys := []string{"status", "args"}
 	incompatiblesKeys := [][]string{
 		{"stdout", "stdout_file"},
 		{"stderr", "stderr_file"},
 		{"stdin", "stdin_file"}}
 
-	for _, key := range requieredKeys {
+	TestsKeys := []string{
+		"args",
+		"status",
+		"stdout",
+		"stderr",
+		"pre",
+		"post",
+		"stdout_file",
+		"stderr_file",
+		"pipe_stdout",
+		"pipe_stderr",
+		"timeout",
+		"should_fail",
+		"stdin",
+		"stdin_file",
+		"env",
+		"add_env",
+		"repeat",
+	}
+
+	for _, key := range requiredKeys {
 		if !testDict.Has(key) {
 			log.Fatalf("%s : Missing field : %s", testName, key)
 		}
@@ -51,4 +54,59 @@ func CheckTestsValidity(testName string, testDict *toml.Tree) {
 			}
 		}
 	}
+}
+
+func runBuildCommand(command string) {
+	fmt.Println(command)
+}
+
+func fixBinaryPath(binaryPath string, fp string) string {
+	splittedPath := strings.Split(fp, "/")
+	splittedPath = splittedPath[:len(splittedPath)-1]
+
+	if len(splittedPath) == 0 { // from the same directory, nothing to do
+		return fp
+	}
+	pathToToml := strings.Join(splittedPath, "/") + "/"
+	if pathToToml == "/" && !strings.Contains(fp, "/") {
+		pathToToml = "./"
+	}
+	binaryPath = pathToToml + binaryPath
+	binaryPath = strings.ReplaceAll(binaryPath, "././", "./")
+	binaryPath = strings.ReplaceAll(binaryPath, "/./", "/")
+	return binaryPath
+}
+
+func checkBinaryValidity(fp string) {
+	
+}
+
+func LoadTestFile(fp string) tester.TestSuiteData {
+	var testData tester.TestSuiteData
+	var err error
+
+	fc := utils.GetFileContent(fp)
+	testData.TomlContent, err = toml.Load(fc)
+	testData.BinaryPath = ""
+
+	if err != nil {
+		log.Fatal(err)
+	}
+	for _, key := range testData.TomlContent.Keys() {
+		if key == "binary_path" {
+			testData.BinaryPath = testData.TomlContent.Get(key).(string)
+		} else if key == "build_command" {
+			runBuildCommand(testData.TomlContent.Get(key).(string))
+		} else {
+			CheckTestsValidity(key, testData.TomlContent.Get(key).(*toml.Tree))
+			// test_dict[key] = toml_content.Get(key).(string)
+			//fmt.Println(testData.TomlContent.Get(key).(*toml.Tree))
+		}
+	}
+	if testData.BinaryPath == "" {
+		log.Fatal("Could not find binary_path key in", fp)
+	}
+	testData.BinaryPath = fixBinaryPath(testData.BinaryPath, fp)
+	checkBinaryValidity(testData.BinaryPath)
+	return testData
 }

@@ -4,5 +4,3 @@ TARGET=jenrik
 
 build:
 	go build -o $(TARGET) $(MAIN_PATH)
-
-

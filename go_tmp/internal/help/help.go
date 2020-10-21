@@ -2,7 +2,7 @@ package help
 
 import "fmt"
 
-func print_help(binary_name string) {
+func Print_help(binary_name string) {
     // Print a basic help showing how to use Jenerik
     fmt.Printf("USAGE : %s file.jrk | init path_to_binary\n", binary_name)
     fmt.Println("\tinit\t\tcreate a basic test file for the given binary")

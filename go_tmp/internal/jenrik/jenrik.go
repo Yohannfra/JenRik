@@ -13,8 +13,8 @@ func run_build_command(command string) {
 }
 
 
-func start_jenrik(fp string) {
-	fc := get_file_content(fp)
+func Start(fp string) {
+	fc := utils.Get_file_content(fp)
 	toml_content, err := toml.Load(fc)
 
 
@@ -30,7 +30,7 @@ func start_jenrik(fp string) {
 		} else if key == "build_command" {
 			run_build_command(toml_content.Get(key).(string))
 		} else {
-			check_tests_validity(key, toml_content.Get(key).(*toml.Tree))
+			parser.Check_tests_validity(key, toml_content.Get(key).(*toml.Tree))
 			// test_dict[key] = toml_content.Get(key).(string)
 			fmt.Println(toml_content.Get(key).(*toml.Tree))
 		}

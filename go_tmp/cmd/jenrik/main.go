@@ -12,15 +12,16 @@ import (
 
 func main() {
 	argv := os.Args
-	argc := len(argv)
 
 	log.SetFlags(0)
 
-	for _, arg := range argv {
+	for i, arg := range argv {
 		if arg == "-q" || arg == "--quiet" {
 			logLevel.LOG_LEVEL = logLevel.QUIET
+			argv = append(argv[:i], argv[i+1:]...)
 		} else if arg == "-d" || arg == "--debug" {
 			logLevel.LOG_LEVEL = logLevel.DEBUG
+			argv = append(argv[:i], argv[i+1:]...)
 		} else if arg == "--version" {
 			fmt.Println(version.JenrikVersion)
 			os.Exit(0)
@@ -30,9 +31,9 @@ func main() {
 		}
 	}
 
-	if argc == 3 && argv[1] == "init" {
+	if len(argv) == 3 && argv[1] == "init" {
 		jenrik.Init(argv[2])
-	} else if argc == 2 {
+	} else if len(argv) == 2 {
 		jenrik.Start(argv[1])
 	} else {
 		help.PrintHelp(argv[0])

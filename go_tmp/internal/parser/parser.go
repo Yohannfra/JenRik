@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"fmt"
+	"github.com/Yohannfra/JenRik/internal/logLevel"
 	"github.com/Yohannfra/JenRik/internal/tester"
 	"github.com/Yohannfra/JenRik/internal/utils"
 	"github.com/pelletier/go-toml"
@@ -68,10 +68,10 @@ func runBuildCommand(command string) {
 		cmd = exec.Command(tmp[0], strings.Join(tmp[1:], " "))
 	}
 
-	fmt.Printf("Running build command : '%s'\n", command)
+	logLevel.PrintDebug("Running build command : %s\n", command)
 	err := cmd.Run()
 	if err != nil {
-		log.Println("Error running build command: ", err)
+		logLevel.PrintDebug("Error running build command: %s\n", err)
 	}
 }
 

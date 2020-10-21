@@ -1,12 +1,12 @@
 package parser
 
 import (
-	"log"
-	"github.com/pelletier/go-toml"
 	"github.com/Yohannfra/JenRik/internal/utils" // is_in
+	"github.com/pelletier/go-toml"
+	"log"
 )
 
-var TESTS_KEYS = []string {
+var TestsKeys = []string {
 	"args",
 	"status",
 	"stdout",
@@ -26,28 +26,28 @@ var TESTS_KEYS = []string {
 	"repeat",
 }
 
-func Check_tests_validity(test_name string, test_dict *toml.Tree) {
-	requiered_keys := []string{"status", "args"}
-	incompatibles_keys := [][]string{
+func CheckTestsValidity(testName string, testDict *toml.Tree) {
+	requieredKeys := []string{"status", "args"}
+	incompatiblesKeys := [][]string{
 		{"stdout", "stdout_file"},
 		{"stderr", "stderr_file"},
 		{"stdin", "stdin_file"}}
 
-	for _, key := range requiered_keys {
-		if ! test_dict.Has(key) {
-			log.Fatalf("%s : Missing field : %s", test_name, key)
+	for _, key := range requieredKeys {
+		if ! testDict.Has(key) {
+			log.Fatalf("%s : Missing field : %s", testName, key)
 		}
 	}
-	for _, key := range test_dict.Keys() {
-		if ! utils.Is_in(key, TESTS_KEYS) {
+	for _, key := range testDict.Keys() {
+		if ! utils.IsIn(key, TestsKeys) {
 			log.Fatalf("Unknown key: %s", key)
 		}
 		// TODO : Check type
 
-		for _, ick := range incompatibles_keys {
-			if key == ick[0] && utils.Is_in(ick[1], test_dict.Keys()) ||
-			key == ick[1] && utils.Is_in(ick[0], test_dict.Keys()) {
-				log.Fatalf("%s: Incompatible keys, %s and %s", test_name, ick[0], ick[1])
+		for _, ick := range incompatiblesKeys {
+			if key == ick[0] && utils.IsIn(ick[1], testDict.Keys()) ||
+			key == ick[1] && utils.IsIn(ick[0], testDict.Keys()) {
+				log.Fatalf("%s: Incompatible keys, %s and %s", testName, ick[0], ick[1])
 			}
 		}
 	}

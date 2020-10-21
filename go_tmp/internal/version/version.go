@@ -1,3 +1,3 @@
 package version
 
-const JENRIK_VERSION = "1.10"
+const JenrikVersion = "1.10"

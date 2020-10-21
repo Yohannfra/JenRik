@@ -2,40 +2,40 @@ package jenrik
 
 import (
 	"fmt"
-	"log"
-	"github.com/pelletier/go-toml"
-	"github.com/Yohannfra/JenRik/internal/utils"
 	"github.com/Yohannfra/JenRik/internal/parser"
+	"github.com/Yohannfra/JenRik/internal/utils"
+	"github.com/pelletier/go-toml"
+	"log"
 )
 
-func run_build_command(command string) {
+func runBuildCommand(command string) {
 	fmt.Println(command)
 }
 
 
 func Start(fp string) {
-	fc := utils.Get_file_content(fp)
-	toml_content, err := toml.Load(fc)
+	fc := utils.GetFileContent(fp)
+	tomlContent, err := toml.Load(fc)
 
 
-	binary_path := ""
+	binaryPath := ""
 	// var test_dict map[string]interface{} // string -> *tomlValue, *Tree, []*Tree
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, key := range toml_content.Keys() {
+	for _, key := range tomlContent.Keys() {
 		if key == "binary_path" {
-			binary_path = toml_content.Get(key).(string)
+			binaryPath = tomlContent.Get(key).(string)
 		} else if key == "build_command" {
-			run_build_command(toml_content.Get(key).(string))
+			runBuildCommand(tomlContent.Get(key).(string))
 		} else {
-			parser.Check_tests_validity(key, toml_content.Get(key).(*toml.Tree))
+			parser.CheckTestsValidity(key, tomlContent.Get(key).(*toml.Tree))
 			// test_dict[key] = toml_content.Get(key).(string)
-			fmt.Println(toml_content.Get(key).(*toml.Tree))
+			fmt.Println(tomlContent.Get(key).(*toml.Tree))
 		}
 	}
-	if binary_path == "" {
+	if binaryPath == "" {
 		log.Fatal("Could not find binary_path key in", fp)
 	}
 

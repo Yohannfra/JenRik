@@ -1,11 +1,11 @@
 package utils
 
 import (
-	"log"
 	"io/ioutil"
+	"log"
 )
 
-func Is_in(str string, arr []string) bool {
+func IsIn(str string, arr []string) bool {
 	for _, a := range arr {
 		if a == str {
 			return true
@@ -14,7 +14,7 @@ func Is_in(str string, arr []string) bool {
 	return false
 }
 
-func Get_file_content(fp string) string {
+func GetFileContent(fp string) string {
     content, err := ioutil.ReadFile(fp)
     if err != nil {
         log.Fatal(err)

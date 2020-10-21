@@ -2,9 +2,8 @@ package help
 
 import "fmt"
 
-func Print_help(binary_name string) {
-    // Print a basic help showing how to use Jenerik
-    fmt.Printf("USAGE : %s file.jrk | init path_to_binary\n", binary_name)
+func PrintHelp(binaryName string) {
+    fmt.Printf("USAGE : %s file.jrk | init path_to_binary\n", binaryName)
     fmt.Println("\tinit\t\tcreate a basic test file for the given binary")
     fmt.Println("\t--version\tprint version information and exit")
     fmt.Println("\t--help\tprint this help and exit")

@@ -1,4 +1,4 @@
-module test_jenrik
+module github.com/Yohannfra/JenRik
 
 go 1.15
 

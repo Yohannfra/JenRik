@@ -37,7 +37,7 @@ func Init(fp string) {
 	fmt.Printf("Initialized %s with success\n", testFileName)
 }
 
-func Start(fp string, quietMode bool) {
+func Start(fp string) {
 	tomlContent := parser.LoadTestFile(fp)
-	tester.Run(tomlContent, quietMode)
+	tester.Run(tomlContent)
 }

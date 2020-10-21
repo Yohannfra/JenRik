@@ -2,11 +2,12 @@ package parser
 
 import (
 	"fmt"
-	"github.com/Yohannfra/JenRik/internal/utils"
 	"github.com/Yohannfra/JenRik/internal/tester"
+	"github.com/Yohannfra/JenRik/internal/utils"
 	"github.com/pelletier/go-toml"
 	"log"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -58,7 +59,20 @@ func CheckTestsValidity(testName string, testDict *toml.Tree) {
 }
 
 func runBuildCommand(command string) {
-	fmt.Println(command)
+	tmp := strings.Split(command, " ")
+	var cmd *exec.Cmd
+
+	if len(tmp) == 1 {
+		cmd = exec.Command(tmp[0])
+	} else {
+		cmd = exec.Command(tmp[0], strings.Join(tmp[1:], " "))
+	}
+
+	fmt.Printf("Running build command : '%s'\n", command)
+	err := cmd.Run()
+	if err != nil {
+		log.Println("Error running build command: ", err)
+	}
 }
 
 func fixBinaryPath(binaryPath string, fp string) string {
@@ -112,8 +126,6 @@ func LoadTestFile(fp string) tester.TestSuiteData {
 			runBuildCommand(testData.TomlContent.Get(key).(string))
 		} else {
 			CheckTestsValidity(key, testData.TomlContent.Get(key).(*toml.Tree))
-			// test_dict[key] = toml_content.Get(key).(string)
-			//fmt.Println(testData.TomlContent.Get(key).(*toml.Tree))
 		}
 	}
 	if testData.BinaryPath == "" {

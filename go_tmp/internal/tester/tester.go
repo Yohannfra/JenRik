@@ -9,6 +9,6 @@ type TestSuiteData struct {
 	FailedTests uint
 }
 
-func Run(data TestSuiteData, quietMode bool) {
+func Run(data TestSuiteData) {
 
 }

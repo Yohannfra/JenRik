@@ -12,11 +12,9 @@ func runBuildCommand(command string) {
 	fmt.Println(command)
 }
 
-
 func Start(fp string) {
 	fc := utils.GetFileContent(fp)
 	tomlContent, err := toml.Load(fc)
-
 
 	binaryPath := ""
 	// var test_dict map[string]interface{} // string -> *tomlValue, *Tree, []*Tree
@@ -40,4 +38,3 @@ func Start(fp string) {
 	}
 
 }
-

@@ -15,9 +15,9 @@ func IsIn(str string, arr []string) bool {
 }
 
 func GetFileContent(fp string) string {
-    content, err := ioutil.ReadFile(fp)
-    if err != nil {
-        log.Fatal(err)
-    }
-    return string(content)
+	content, err := ioutil.ReadFile(fp)
+	if err != nil {
+		log.Fatal(err)
+	}
+	return string(content)
 }

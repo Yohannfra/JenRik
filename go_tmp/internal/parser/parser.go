@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-var TestsKeys = []string {
+var TestsKeys = []string{
 	"args",
 	"status",
 	"stdout",
@@ -34,22 +34,21 @@ func CheckTestsValidity(testName string, testDict *toml.Tree) {
 		{"stdin", "stdin_file"}}
 
 	for _, key := range requieredKeys {
-		if ! testDict.Has(key) {
+		if !testDict.Has(key) {
 			log.Fatalf("%s : Missing field : %s", testName, key)
 		}
 	}
 	for _, key := range testDict.Keys() {
-		if ! utils.IsIn(key, TestsKeys) {
+		if !utils.IsIn(key, TestsKeys) {
 			log.Fatalf("Unknown key: %s", key)
 		}
 		// TODO : Check type
 
 		for _, ick := range incompatiblesKeys {
 			if key == ick[0] && utils.IsIn(ick[1], testDict.Keys()) ||
-			key == ick[1] && utils.IsIn(ick[0], testDict.Keys()) {
+				key == ick[1] && utils.IsIn(ick[0], testDict.Keys()) {
 				log.Fatalf("%s: Incompatible keys, %s and %s", testName, ick[0], ick[1])
 			}
 		}
 	}
 }
-

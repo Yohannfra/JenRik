@@ -13,7 +13,7 @@ import (
 func main() {
 	argv := os.Args
 
-	log.SetFlags(0)
+	log.SetFlags(0) // disable time in logs
 
 	for i, arg := range argv {
 		if arg == "-q" || arg == "--quiet" {

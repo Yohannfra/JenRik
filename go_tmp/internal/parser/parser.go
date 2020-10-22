@@ -1,7 +1,7 @@
 package parser
 
 import (
-	"github.com/Yohannfra/JenRik/internal/logLevel"
+	"fmt"
 	"github.com/Yohannfra/JenRik/internal/tester"
 	"github.com/Yohannfra/JenRik/internal/utils"
 	"github.com/pelletier/go-toml"
@@ -11,49 +11,80 @@ import (
 	"strings"
 )
 
-func CheckTestsValidity(testName string, testDict *toml.Tree) {
-	requiredKeys := []string{"status", "args"}
-	incompatiblesKeys := [][]string{
-		{"stdout", "stdout_file"},
-		{"stderr", "stderr_file"},
-		{"stdin", "stdin_file"}}
+func isStringArray(data interface{}) bool {
+	arr := data.([]interface{})
 
-	TestsKeys := []string{
-		"args",
-		"status",
-		"stdout",
-		"stderr",
-		"pre",
-		"post",
-		"stdout_file",
-		"stderr_file",
-		"pipe_stdout",
-		"pipe_stderr",
-		"timeout",
-		"should_fail",
-		"stdin",
-		"stdin_file",
-		"env",
-		"add_env",
-		"repeat",
-	}
-
-	for _, key := range requiredKeys {
-		if !testDict.Has(key) {
-			log.Fatalf("%s : Missing field : %s", testName, key)
+	for _, d := range arr {
+		if !isOfType(d, []string{"string"}) {
+			return false
 		}
 	}
+	return true
+}
+
+func isOfType(data interface{}, typeToMatch []string) bool {
+	t := fmt.Sprintf("%T", data)
+
+	if t == "[]interface {}" { // check for str array
+		return isStringArray(data)
+	}
+	for _, w := range typeToMatch {
+		if w == t {
+			return true
+		}
+	}
+	return false
+}
+
+func CheckTestsValidity(testName string, testDict *toml.Tree) {
+	testsKeysConfig := []struct {
+		name             string
+		types            []string
+		incompatibleWith string
+		required         bool
+	}{
+		{"args", []string{"strList"}, "", true},
+		{"status", []string{"int64"}, "", true},
+		{"stdout", []string{"strList", "string"}, "stdout_file", false},
+		{"stderr", []string{"strList", "string"}, "stderr_file", false},
+		{"pre", []string{"strList", "string"}, "", false},
+		{"post", []string{"strList", "string"}, "", false},
+		{"stdout_file", []string{"string"}, "stdout", false},
+		{"stderr_file", []string{"string"}, "stderr", false},
+		{"pipe_stdout", []string{"string"}, "", false},
+		{"pipe_stderr", []string{"string"}, "", false},
+		{"timeout", []string{"int64"}, "", false},
+		{"should_fail", []string{"bool"}, "", false},
+		{"stdin", []string{"strList", "string"}, "stdin_file", false},
+		{"stdin_file", []string{"string"}, "stdin", false},
+		{"env", []string{"dict"}, "", false},
+		{"add_env", []string{"dict"}, "", false},
+		{"repeat", []string{"int64"}, "", false},
+	}
+
 	for _, key := range testDict.Keys() {
-		if !utils.IsIn(key, TestsKeys) {
+		found := false
+		var types []string
+
+		for _, keyConfig := range testsKeysConfig {
+			if keyConfig.name == key {
+				found = true
+				types = keyConfig.types
+			}
+			if key == keyConfig.name && utils.IsIn(keyConfig.incompatibleWith, testDict.Keys()) {
+				log.Fatalf("%s: Incompatible keys, %s and %s", testName, keyConfig.name, keyConfig.incompatibleWith)
+			}
+
+			if keyConfig.required && !utils.IsIn(keyConfig.name, testDict.Keys()) {
+				log.Fatalf("%s : Missing field : %s", testName, keyConfig.name)
+			}
+		}
+		if found == false {
 			log.Fatalf("Unknown key: %s", key)
 		}
-		// TODO : Check type
-
-		for _, ick := range incompatiblesKeys {
-			if key == ick[0] && utils.IsIn(ick[1], testDict.Keys()) ||
-				key == ick[1] && utils.IsIn(ick[0], testDict.Keys()) {
-				log.Fatalf("%s: Incompatible keys, %s and %s", testName, ick[0], ick[1])
-			}
+		value := testDict.Get(key)
+		if !isOfType(value, types) {
+			log.Fatalf("Error in test '%s' : key '%s' must be '%v' but it's '%T'", testName, key, types, value)
 		}
 	}
 }
@@ -68,10 +99,9 @@ func runBuildCommand(command string) {
 		cmd = exec.Command(tmp[0], strings.Join(tmp[1:], " "))
 	}
 
-	logLevel.PrintDebug("Running build command : %s\n", command)
 	err := cmd.Run()
 	if err != nil {
-		logLevel.PrintDebug("Error running build command: %s\n", err)
+		log.Fatalln("Error running build command", err)
 	}
 }
 

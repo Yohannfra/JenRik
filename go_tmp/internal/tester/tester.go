@@ -3,7 +3,9 @@ package tester
 import (
 	"bytes"
 	"fmt"
+	"github.com/Yohannfra/JenRik/internal/logLevel"
 	"github.com/pelletier/go-toml"
+	"math"
 	"os"
 	"os/exec"
 	"strings"
@@ -58,23 +60,62 @@ func runCmd(command string) ShellCommandData {
 	return data
 }
 
-func runTest(binaryPath string, testName string, testData *toml.Tree) bool {
-	a := runCmd(binaryPath)
-	fmt.Print(a)
-	//argsTmp := testData.Get("args").([]interface{})
-	//var args []string
-	//
-	//for _, arg := range argsTmp {
-	//	argType := fmt.Sprintf("%T", arg)
-	//	if argType == "string" {
-	//		args = append(args, arg.(string))
-	//	} else {
-	//		log.Fatalf("Error, invalid type in args : %s", argType)
-	//	}
-	//}
-	//fmt.Println(args)
-
+func printTestFail(format string, a ...interface{}) bool {
+	fmt.Printf(ANSI_RED+"", "KO")
+	fmt.Print(" : ")
+	fmt.Printf(format, a...)
 	return false
+}
+
+func printDiff(gotStr string, expectedStr string) {
+	if logLevel.LOG_LEVEL == logLevel.QUIET {
+		return
+	}
+	maxLen := math.Max(float64(len(gotStr)), float64(len(expectedStr)))
+	fmt.Println(strings.Repeat("-", int(math.Min(30, maxLen))))
+	fmt.Println("Expected:'")
+	fmt.Print(gotStr)
+	fmt.Print("'\n")
+	fmt.Println("Bug got:'")
+	fmt.Print(expectedStr)
+	fmt.Print("'\n")
+	fmt.Println(strings.Repeat("-", int(math.Min(30, maxLen))))
+}
+
+func runTest(binaryPath string, testName string, testData *toml.Tree) bool {
+	var args []string
+
+	argsTmp := testData.Get("args").([]interface{})
+	for _, arg := range argsTmp {
+		args = append(args, arg.(string))
+	}
+	st, _ := testData.Get("status").(int64)
+	a := runCmd(binaryPath + " " + strings.Join(args, " "))
+
+	if int64(a.exitStatus) != st { // exit status
+		return printTestFail("Invalid exit status, expected %d but got %d\n", int(st), a.exitStatus)
+	}
+
+	if b := testData.Get("stdout"); b != nil {
+		if b != a.stderr {
+			printTestFail("Invalid stdout\n")
+			val := testData.Get("stdout").(string)
+			printDiff(val, a.stderr)
+			return false
+		}
+	}
+
+	if b := testData.Get("stderr"); b != nil {
+		if b != a.stderr {
+			printTestFail("Invalid stderr\n")
+			val := testData.Get("stderr").(string)
+			printDiff(val, a.stderr)
+			return false
+		}
+	}
+
+	//fmt.Println(a.stderr)
+	return true
 }
 
 func Run(testSuiteData TestSuiteData) {
@@ -85,7 +126,6 @@ func Run(testSuiteData TestSuiteData) {
 		fmt.Printf("%s : ", key)
 		if !runTest(testSuiteData.BinaryPath, key, testSuiteData.TomlContent.Get(key).(*toml.Tree)) { // test fail
 			testSuiteData.FailedTests += 1
-			fmt.Printf(ANSI_RED+"\n", "KO")
 		} else { // test success
 			fmt.Printf(ANSI_GREEN+"\n", "OK")
 		}

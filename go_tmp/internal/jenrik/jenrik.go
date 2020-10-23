@@ -2,8 +2,8 @@ package jenrik
 
 import (
 	"fmt"
-	"github.com/Yohannfra/JenRik/internal/parser"
 	"github.com/Yohannfra/JenRik/internal/tester"
+	"github.com/Yohannfra/JenRik/internal/tomlLoader"
 	"github.com/Yohannfra/JenRik/internal/utils"
 	"log"
 	"os"
@@ -38,6 +38,6 @@ func Init(fp string) {
 }
 
 func Start(fp string) {
-	tomlContent := parser.LoadTestFile(fp)
-	tester.Run(tomlContent)
+	tomlContent := tomlLoader.LoadTestFile(fp)
+	tester.Run(&tomlContent)
 }

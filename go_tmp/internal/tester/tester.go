@@ -30,7 +30,7 @@ type ShellCommandData struct {
 	stderr     string
 }
 
-func printSummary(testSuiteData TestSuiteData) {
+func printSummary(testSuiteData *TestSuiteData) {
 	fmt.Printf("\nSummary %s: %d tests ran\n", testSuiteData.BinaryPath, testSuiteData.TotalTests)
 	fmt.Printf("%d : "+ANSI_GREEN+"\n", testSuiteData.TotalTests-testSuiteData.FailedTests, "OK")
 	fmt.Printf("%d : "+ANSI_RED+"\n", testSuiteData.FailedTests, "KO")
@@ -82,6 +82,36 @@ func printDiff(gotStr string, expectedStr string) {
 	fmt.Println(strings.Repeat("-", int(math.Min(30, maxLen))))
 }
 
+func checkTestResult(testData *toml.Tree, testRes *ShellCommandData) bool {
+	// exit status
+	st, _ := testData.Get("status").(int64)
+	if int64(testRes.exitStatus) != st {
+		return printTestFail("Invalid exit status, expected %d but got %d\n", int(st), testRes.exitStatus)
+	}
+
+	// stdout
+	if testData.Has("stdout") {
+		val := testData.Get("stdout").(string)
+		if val != testRes.stderr {
+			printTestFail("Invalid stdout\n")
+			printDiff(val, testRes.stderr)
+			return false
+		}
+	}
+
+	// stderr
+	if testData.Has("stderr") {
+		//if
+		val := testData.Get("stderr").(string)
+		if val != testRes.stderr {
+			printTestFail("Invalid stderr\n")
+			printDiff(val, testRes.stderr)
+			return false
+		}
+	}
+	return true
+}
+
 func runTest(binaryPath string, testName string, testData *toml.Tree) bool {
 	var args []string
 
@@ -89,36 +119,22 @@ func runTest(binaryPath string, testName string, testData *toml.Tree) bool {
 	for _, arg := range argsTmp {
 		args = append(args, arg.(string))
 	}
-	st, _ := testData.Get("status").(int64)
-	a := runCmd(binaryPath + " " + strings.Join(args, " "))
+	testResult := runCmd(binaryPath + " " + strings.Join(args, " "))
 
-	if int64(a.exitStatus) != st { // exit status
-		return printTestFail("Invalid exit status, expected %d but got %d\n", int(st), a.exitStatus)
-	}
+	if testData.Has("repeat") {
+		val := int(testData.Get("repeat").(int64))
+		if val > 0 {
+			fmt.Printf(" - Repeat %d %s: ", val, testName)
 
-	if b := testData.Get("stdout"); b != nil {
-		if b != a.stderr {
-			printTestFail("Invalid stdout\n")
-			val := testData.Get("stdout").(string)
-			printDiff(val, a.stderr)
-			return false
+			testData.Set("repeat", int64(val-1))
+			runTest(binaryPath, testName, testData)
 		}
 	}
+	return checkTestResult(testData, &testResult)
 
-	if b := testData.Get("stderr"); b != nil {
-		if b != a.stderr {
-			printTestFail("Invalid stderr\n")
-			val := testData.Get("stderr").(string)
-			printDiff(val, a.stderr)
-			return false
-		}
-	}
-
-	//fmt.Println(a.stderr)
-	return true
 }
 
-func Run(testSuiteData TestSuiteData) {
+func Run(testSuiteData *TestSuiteData) {
 	for _, key := range testSuiteData.TomlContent.Keys() {
 		if key == "binary_path" || key == "build_command" {
 			continue

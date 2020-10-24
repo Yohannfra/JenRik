@@ -8,80 +8,80 @@ import (
 )
 
 type Test struct {
-	name       string
-	args       []string
-	pipeStdout string
-	pipeStderr string
-	stdout     string
-	stderr     string
-	stdin      string
-	status     int
-	timeout    int
-	shouldFail bool
-	pre        string
-	repeat     int
-	post       string
-	env        map[string]string
+	Name       string
+	Args       []string
+	PipeStdout string
+	PipeStderr string
+	Stdout     string
+	Stderr     string
+	Stdin      string
+	Status     int
+	Timeout    int
+	ShouldFail bool
+	Pre        string
+	Repeat     int
+	Post       string
+	Env        map[string]string
 }
 
 func (t Test) Print() {
-	fmt.Printf("Test: '%s':\n", t.name)
+	fmt.Printf("Test: '%s':\n", t.Name)
 	fmt.Print("\targs: ")
-	utils.PrintStrArray(t.args)
-	fmt.Printf("\tpipe stdout: '%s'\n", t.pipeStdout)
-	fmt.Printf("\tpipe stderr: '%s'\n", t.pipeStderr)
-	fmt.Printf("\tstdout: '%s'\n", t.stdout)
-	fmt.Printf("\tstderr: '%s'\n", t.stderr)
-	fmt.Printf("\tstdin: '%s'\n", t.stdin)
-	fmt.Println("\tstatus: ", t.status)
-	fmt.Println("\ttimeout: ", t.timeout)
-	fmt.Println("\tshouldFail: ", t.shouldFail)
-	fmt.Printf("\tpre: '%s'\n", t.pre)
-	fmt.Println("\trepeat: ", t.repeat)
-	fmt.Printf("\tpost: '%s\n", t.post)
-	fmt.Println("\tenv: ", t.env)
+	utils.PrintStrArray(t.Args)
+	fmt.Printf("\tpipe stdout: '%s'\n", t.PipeStdout)
+	fmt.Printf("\tpipe stderr: '%s'\n", t.PipeStderr)
+	fmt.Printf("\tstdout: '%s'\n", t.Stdout)
+	fmt.Printf("\tstderr: '%s'\n", t.Stderr)
+	fmt.Printf("\tstdin: '%s'\n", t.Stdin)
+	fmt.Println("\tstatus: ", t.Status)
+	fmt.Println("\ttimeout: ", t.Timeout)
+	fmt.Println("\tshouldFail: ", t.ShouldFail)
+	fmt.Printf("\tpre: '%s'\n", t.Pre)
+	fmt.Println("\trepeat: ", t.Repeat)
+	fmt.Printf("\tpost: '%s\n", t.Post)
+	fmt.Println("\tenv: ", t.Env)
 }
 
 func NewTest(name string, tomlContent *toml.Tree) *Test {
 	t := new(Test)
 
-	t.name = name
+	t.Name = name
 
-	t.status = int(tomlContent.Get("status").(int64))
-	t.args = tomlUtils.ToStrArr(tomlContent.Get("args"))
+	t.Status = int(tomlContent.Get("status").(int64))
+	t.Args = tomlUtils.ToStrArr(tomlContent.Get("args"))
 
 	if tomlContent.Has("repeat") {
-		t.repeat = int(tomlContent.Get("repeat").(int64))
+		t.Repeat = int(tomlContent.Get("repeat").(int64))
 	}
 	if tomlContent.Has("timeout") {
-		t.timeout = int(tomlContent.Get("timeout").(int64))
+		t.Timeout = int(tomlContent.Get("timeout").(int64))
 	}
 	if tomlContent.Has("shouldFail") {
-		t.shouldFail = tomlContent.Get("shouldFail").(bool)
+		t.ShouldFail = tomlContent.Get("shouldFail").(bool)
 	}
 	if tomlContent.Has("stderr") {
-		t.stderr = utils.ArrOrStrToStr(tomlContent.Get("stderr"))
+		t.Stderr = utils.ArrOrStrToStr(tomlContent.Get("stderr"))
 	}
 	if tomlContent.Has("stdout") {
-		t.stdout = utils.ArrOrStrToStr(tomlContent.Get("stdout"))
+		t.Stdout = utils.ArrOrStrToStr(tomlContent.Get("stdout"))
 	}
 	if tomlContent.Has("pre") {
-		t.pre = utils.ArrOrStrToStr(tomlContent.Get("pre"))
+		t.Pre = utils.ArrOrStrToStr(tomlContent.Get("pre"))
 	}
 	if tomlContent.Has("post") {
-		t.post = utils.ArrOrStrToStr(tomlContent.Get("post"))
+		t.Post = utils.ArrOrStrToStr(tomlContent.Get("post"))
 	}
 	if tomlContent.Has("stdin") {
-		t.stdin = utils.ArrOrStrToStr(tomlContent.Get("stdin"))
+		t.Stdin = utils.ArrOrStrToStr(tomlContent.Get("stdin"))
 	}
 	if tomlContent.Has("pipeStdout") {
-		t.pipeStdout = tomlContent.Get("pipeStdout").(string)
+		t.PipeStdout = tomlContent.Get("pipeStdout").(string)
 	}
 	if tomlContent.Has("pipeStderr") {
-		t.pipeStderr = tomlContent.Get("pipeStderr").(string)
+		t.PipeStderr = tomlContent.Get("pipeStderr").(string)
 	}
 	if tomlContent.Has("env") {
-		t.env = tomlUtils.ToStrMap(tomlContent.Get("env").(*toml.Tree))
+		t.Env = tomlUtils.ToStrMap(tomlContent.Get("env").(*toml.Tree))
 	}
 	return t
 }

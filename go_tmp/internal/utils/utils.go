@@ -50,18 +50,6 @@ func PrintDiff(gotStr string, expectedStr string) {
 	fmt.Println(strings.Repeat("-", int(math.Min(30, maxLen))))
 }
 
-func CompareStrArray(arr1 []string, arr2 []string) bool {
-	if len(arr1) != len(arr2) {
-		return false
-	}
-	for i, _ := range arr1 {
-		if arr1[i] != arr2[i] {
-			return false
-		}
-	}
-	return true
-}
-
 func PrintStrArray(arr []string) {
 	fmt.Print("[")
 	for i, s := range arr {

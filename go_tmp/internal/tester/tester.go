@@ -3,9 +3,10 @@ package tester
 import (
 	"bytes"
 	"fmt"
-	"github.com/Yohannfra/JenRik/internal/logLevel"
+	"github.com/Yohannfra/JenRik/internal/tomlLoader/tomlUtils"
+	"github.com/Yohannfra/JenRik/internal/utils"
+	"github.com/Yohannfra/JenRik/internal/testData/testData"
 	"github.com/pelletier/go-toml"
-	"math"
 	"os"
 	"os/exec"
 	"strings"
@@ -20,6 +21,7 @@ const (
 type TestSuiteData struct {
 	BinaryPath  string
 	TomlContent *toml.Tree
+	testSuite   []testData
 	TotalTests  int
 	FailedTests int
 }
@@ -67,20 +69,18 @@ func printTestFail(format string, a ...interface{}) bool {
 	return false
 }
 
-func printDiff(gotStr string, expectedStr string) {
-	if logLevel.LOG_LEVEL == logLevel.QUIET {
-		return
-	}
-	maxLen := math.Max(float64(len(gotStr)), float64(len(expectedStr)))
-	fmt.Println(strings.Repeat("-", int(math.Min(30, maxLen))))
-	fmt.Println("Expected:'")
-	fmt.Print(gotStr)
-	fmt.Print("'\n")
-	fmt.Println("Bug got:'")
-	fmt.Print(expectedStr)
-	fmt.Print("'\n")
-	fmt.Println(strings.Repeat("-", int(math.Min(30, maxLen))))
-}
+//
+//func compareOutput(gotStr string, toMatch interface{}) bool {
+//
+//	if tomlUtils.IsStringArray(toMatch) {
+//		val := tomlUtils.ToStrArr(toMatch)
+//		fmt.Println(val)
+//		return false
+//	} else { // simple str
+//		val := toMatch.(string)
+//		return val == gotStr
+//	}
+//}
 
 func checkTestResult(testData *toml.Tree, testRes *ShellCommandData) bool {
 	// exit status
@@ -91,34 +91,62 @@ func checkTestResult(testData *toml.Tree, testRes *ShellCommandData) bool {
 
 	// stdout
 	if testData.Has("stdout") {
-		val := testData.Get("stdout").(string)
-		if val != testRes.stderr {
-			printTestFail("Invalid stdout\n")
-			printDiff(val, testRes.stderr)
-			return false
+		if tomlUtils.IsStringArray(testData.Get("stdout")) {
+			val := tomlUtils.ToStrArr(testData.Get("stdout"))
+			if utils.CompareStrArray(val, strings.Split(testRes.stdout, "\n")) {
+				printTestFail("Invalid stdout\n")
+				utils.PrintDiff(strings.Join(val, "\n"), testRes.stdout)
+			}
+		} else {
+			val := testData.Get("stdout").(string)
+			if val != testRes.stdout {
+				printTestFail("Invalid stdout\n")
+				utils.PrintDiff(val, testRes.stdout)
+				return false
+			}
+		}
+	}
+
+	if testData.Has("stderr") {
+		if tomlUtils.IsStringArray(testData.Get("stderr")) {
+			val := tomlUtils.ToStrArr(testData.Get("stderr"))
+			if utils.CompareStrArray(val, strings.Split(testRes.stderr, "\n")) {
+				printTestFail("Invalid stderr\n")
+				utils.PrintDiff(strings.Join(val, "\n"), testRes.stderr)
+			}
+		} else {
+			val := testData.Get("stderr").(string)
+			if val != testRes.stderr {
+				printTestFail("Invalid stdout\n")
+				utils.PrintDiff(val, testRes.stderr)
+				return false
+			}
 		}
 	}
 
 	// stderr
-	if testData.Has("stderr") {
-		//if
-		val := testData.Get("stderr").(string)
-		if val != testRes.stderr {
-			printTestFail("Invalid stderr\n")
-			printDiff(val, testRes.stderr)
-			return false
-		}
-	}
+	//if testData.Has("stderr") {
+	//	var match bool
+	//	if tomlUtils.IsStringArray(testData.Get("stderr")) {
+	//		val := tomlUtils.ToStrArr(testData.Get("stderr"))
+	//		fmt.Println(val)
+	//	} else { // simple str
+	//		val := testData.Get("stderr").(string)
+	//		fmt.Println(val)
+	//	}
+	//	match = true
+	//	if match {
+	//		//if val != testRes.stderr {
+	//		printTestFail("Invalid stderr\n")
+	//		//printDiff(val, testRes.stderr)
+	//		return false
+	//	}
+	//}
 	return true
 }
 
 func runTest(binaryPath string, testName string, testData *toml.Tree) bool {
-	var args []string
-
-	argsTmp := testData.Get("args").([]interface{})
-	for _, arg := range argsTmp {
-		args = append(args, arg.(string))
-	}
+	args := tomlUtils.ToStrArr(testData.Get("args"))
 	testResult := runCmd(binaryPath + " " + strings.Join(args, " "))
 
 	if testData.Has("repeat") {
@@ -131,10 +159,10 @@ func runTest(binaryPath string, testName string, testData *toml.Tree) bool {
 		}
 	}
 	return checkTestResult(testData, &testResult)
-
 }
 
-func Run(testSuiteData *TestSuiteData) {
+func
+Run(testSuiteData *TestSuiteData) {
 	for _, key := range testSuiteData.TomlContent.Keys() {
 		if key == "binary_path" || key == "build_command" {
 			continue

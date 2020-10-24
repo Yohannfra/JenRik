@@ -26,3 +26,13 @@ func IsOfType(data interface{}, typeToMatch []string) bool {
 	}
 	return false
 }
+
+func ToStrArr(data interface{}) []string {
+	var arr []string
+	tmp := data.([]interface{})
+
+	for _, elem := range tmp {
+		arr = append(arr, elem.(string))
+	}
+	return arr
+}

@@ -3,6 +3,7 @@ package utils
 import (
 	"fmt"
 	"github.com/Yohannfra/JenRik/internal/logLevel"
+	"github.com/Yohannfra/JenRik/internal/tomlLoader/tomlUtils"
 	"io/ioutil"
 	"log"
 	"math"
@@ -59,4 +60,28 @@ func CompareStrArray(arr1 []string, arr2 []string) bool {
 		}
 	}
 	return true
+}
+
+func PrintStrArray(arr []string) {
+	fmt.Print("[")
+	for i, s := range arr {
+		fmt.Printf("\"%s\"", s)
+		if i != len(arr)-1 {
+			fmt.Print(", ")
+		}
+	}
+	fmt.Println("]")
+}
+
+func ArrOrStrToStr(itr interface{}) string {
+	var s string
+
+	tmp := fmt.Sprintf("%T", itr)
+
+	if tmp == "[]interface {}" && tomlUtils.IsStringArray(itr) {
+		s = strings.Join(tomlUtils.ToStrArr(itr), "\n")
+	} else {
+		s = itr.(string)
+	}
+	return s
 }

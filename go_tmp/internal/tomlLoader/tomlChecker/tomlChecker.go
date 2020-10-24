@@ -31,8 +31,8 @@ func CheckTestsValidity(testName string, testDict *toml.Tree) {
 		{"should_fail", []string{"bool"}, "", false},
 		{"stdin", []string{"strList", "string"}, "stdin_file", false},
 		{"stdin_file", []string{"string"}, "stdin", false},
-		{"env", []string{"dict"}, "", false},
-		{"add_env", []string{"dict"}, "", false},
+		{"env", []string{"*toml.Tree"}, "", false},
+		{"add_env", []string{"*toml.Tree"}, "", false},
 		{"repeat", []string{"int64"}, "", false},
 	}
 

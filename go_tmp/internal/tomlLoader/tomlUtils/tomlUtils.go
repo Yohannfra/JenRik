@@ -1,6 +1,18 @@
 package tomlUtils
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/pelletier/go-toml"
+)
+
+func IsStringMap(data *toml.Tree) bool {
+	for _, d := range data.Keys() {
+		if !IsOfType(d, []string{"string"}) || !IsOfType(data.Get(d), []string{"string"}) {
+			return false
+		}
+	}
+	return true
+}
 
 func IsStringArray(data interface{}) bool {
 	arr := data.([]interface{})
@@ -18,6 +30,8 @@ func IsOfType(data interface{}, typeToMatch []string) bool {
 
 	if t == "[]interface {}" { // check for str array
 		return IsStringArray(data)
+	} else if t == "*toml.Tree" { // for env
+		return IsStringMap(data.(*toml.Tree))
 	}
 	for _, w := range typeToMatch {
 		if w == t {
@@ -35,4 +49,14 @@ func ToStrArr(data interface{}) []string {
 		arr = append(arr, elem.(string))
 	}
 	return arr
+}
+
+func ToStrMap(data *toml.Tree) map[string]string {
+	var dict map[string]string
+	dict = make(map[string]string)
+
+	for _, d := range data.Keys() {
+		dict[d] = data.Get(d).(string)
+	}
+	return dict
 }

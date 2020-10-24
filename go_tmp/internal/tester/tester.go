@@ -3,9 +3,9 @@ package tester
 import (
 	"bytes"
 	"fmt"
+	"github.com/Yohannfra/JenRik/internal/testData"
 	"github.com/Yohannfra/JenRik/internal/tomlLoader/tomlUtils"
 	"github.com/Yohannfra/JenRik/internal/utils"
-	"github.com/Yohannfra/JenRik/internal/testData/testData"
 	"github.com/pelletier/go-toml"
 	"os"
 	"os/exec"
@@ -21,7 +21,7 @@ const (
 type TestSuiteData struct {
 	BinaryPath  string
 	TomlContent *toml.Tree
-	testSuite   []testData
+	TestSuite   []*testData.Test
 	TotalTests  int
 	FailedTests int
 }
@@ -161,20 +161,19 @@ func runTest(binaryPath string, testName string, testData *toml.Tree) bool {
 	return checkTestResult(testData, &testResult)
 }
 
-func
-Run(testSuiteData *TestSuiteData) {
-	for _, key := range testSuiteData.TomlContent.Keys() {
-		if key == "binary_path" || key == "build_command" {
-			continue
-		}
-		fmt.Printf("%s : ", key)
-		if !runTest(testSuiteData.BinaryPath, key, testSuiteData.TomlContent.Get(key).(*toml.Tree)) { // test fail
-			testSuiteData.FailedTests += 1
-		} else { // test success
-			fmt.Printf(ANSI_GREEN+"\n", "OK")
-		}
-		testSuiteData.TotalTests += 1
-	}
+func Run(testSuiteData *TestSuiteData) {
+	//for _, key := range testSuiteData.TomlContent.Keys() {
+	//	if key == "binary_path" || key == "build_command" {
+	//		continue
+	//	}
+	//fmt.Printf("%s : ", key)
+	//if !runTest(testSuiteData.BinaryPath, key, testSuiteData.TomlContent.Get(key).(*toml.Tree)) { // test fail
+	//	testSuiteData.FailedTests += 1
+	//} else { // test success
+	//	fmt.Printf(ANSI_GREEN+"\n", "OK")
+	//}
+	//testSuiteData.TotalTests += 1
+	//}
 	printSummary(testSuiteData)
 	os.Exit(testSuiteData.FailedTests)
 }

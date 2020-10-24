@@ -1,6 +1,7 @@
 package tomlLoader
 
 import (
+	"github.com/Yohannfra/JenRik/internal/testData"
 	"github.com/Yohannfra/JenRik/internal/tester"
 	"github.com/Yohannfra/JenRik/internal/tomlLoader/tomlChecker"
 	"github.com/Yohannfra/JenRik/internal/utils"
@@ -9,30 +10,38 @@ import (
 )
 
 func LoadTestFile(fp string) tester.TestSuiteData {
-	var testData tester.TestSuiteData
+	var testSuiteData tester.TestSuiteData
 	var err error
 
 	fc := utils.GetFileContent(fp)
-	testData.TomlContent, err = toml.Load(fc)
-	testData.BinaryPath = ""
+	TomlContent, err := toml.Load(fc)
+	testSuiteData.BinaryPath = ""
 
 	if err != nil {
 		log.Fatal(err)
 	}
-	for _, key := range testData.TomlContent.Keys() {
+	for _, key := range TomlContent.Keys() {
 		if key == "binary_path" {
-			testData.BinaryPath = testData.TomlContent.Get(key).(string)
+			testSuiteData.BinaryPath = TomlContent.Get(key).(string)
 		} else if key == "build_command" {
-			tomlChecker.RunBuildCommand(testData.TomlContent.Get(key).(string))
+			tomlChecker.RunBuildCommand(TomlContent.Get(key).(string))
 		} else {
-			tomlChecker.CheckTestsValidity(key, testData.TomlContent.Get(key).(*toml.Tree))
+			tomlChecker.CheckTestsValidity(key, TomlContent.Get(key).(*toml.Tree))
 		}
 	}
-	if testData.BinaryPath == "" {
+	if testSuiteData.BinaryPath == "" {
 		log.Fatal("Could not find binary_path key in", fp)
 	}
 
-	testData.BinaryPath = tomlChecker.FixBinaryPath(testData.BinaryPath, fp)
-	tomlChecker.CheckBinaryValidity(testData.BinaryPath)
-	return testData
+	testSuiteData.BinaryPath = tomlChecker.FixBinaryPath(testSuiteData.BinaryPath, fp)
+
+	for _, key := range TomlContent.Keys() {
+		if key == "binary_path" || key == "build_command" {
+			continue
+		}
+		t := testData.NewTest(key, TomlContent.Get(key).(*toml.Tree))
+		testSuiteData.TestSuite = append(testSuiteData.TestSuite, t)
+	}
+	tomlChecker.CheckBinaryValidity(testSuiteData.BinaryPath)
+	return testSuiteData
 }

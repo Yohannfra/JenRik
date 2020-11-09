@@ -1,6 +1,7 @@
 package tomlLoader
 
 import (
+	"fmt"
 	"github.com/Yohannfra/JenRik/internal/testData"
 	"github.com/Yohannfra/JenRik/internal/tester"
 	"github.com/Yohannfra/JenRik/internal/tomlLoader/tomlChecker"
@@ -24,7 +25,10 @@ func LoadTestFile(fp string) tester.TestSuiteData {
 		if key == "binary_path" {
 			testSuiteData.BinaryPath = TomlContent.Get(key).(string)
 		} else if key == "build_command" {
-			tomlChecker.RunBuildCommand(TomlContent.Get(key).(string))
+			err := utils.RunShellCommand(TomlContent.Get(key).(string))
+			if err != nil {
+				fmt.Println("build command failed: ", err)
+			}
 		} else {
 			tomlChecker.CheckTestsValidity(key, TomlContent.Get(key).(*toml.Tree))
 		}

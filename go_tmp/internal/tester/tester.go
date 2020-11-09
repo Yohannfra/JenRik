@@ -17,8 +17,7 @@ const (
 )
 
 type TestSuiteData struct {
-	BinaryPath string
-	//TomlContent *toml.Tree
+	BinaryPath  string
 	TestSuite   []*testData.Test
 	TotalTests  int
 	FailedTests int
@@ -94,12 +93,19 @@ func checkTestResult(test *testData.Test, testRes *ShellCommandData) bool {
 
 func runTest(binaryPath string, test *testData.Test) bool {
 	args := test.Args
-	testResult := runCmd(binaryPath + " " + strings.Join(args, " "))
 
-	if test.Repeat > 0 {
-		fmt.Printf(" - Repeat %d %s: ", test.Repeat, test.Name)
-		test.Repeat -= 1
-		runTest(binaryPath, test)
+	if test.Pre != "" {
+		err := utils.RunShellCommand(test.Pre)
+		if err != nil {
+			fmt.Println("Pre command error: ", err)
+		}
+	}
+	testResult := runCmd(binaryPath + " " + strings.Join(args, " "))
+	if test.Post != "" {
+		err := utils.RunShellCommand(test.Post)
+		if err != nil {
+			fmt.Println("Post command error: ", err)
+		}
 	}
 	res := checkTestResult(test, &testResult)
 
@@ -109,14 +115,37 @@ func runTest(binaryPath string, test *testData.Test) bool {
 	} else if test.ShouldFail && !res {
 		return false
 	}
-	return true
+	return res
+}
+
+func repeatTest(binaryPath string, test *testData.Test) int {
+	failedTests := 0
+	testToRun := test.Repeat
+
+	fmt.Print("\n")
+	for test.Repeat > 0 {
+		fmt.Printf("  -> repeat %d : ", testToRun-test.Repeat+1)
+		if !runTest(binaryPath, test) {
+			failedTests += 1
+		} else {
+			fmt.Printf(ANSI_GREEN+"\n", "OK")
+		}
+		test.Repeat -= 1
+	}
+	return failedTests
 }
 
 func Run(testSuiteData *TestSuiteData) {
 	for _, test := range testSuiteData.TestSuite {
-		if !runTest(testSuiteData.BinaryPath, test) { // test fail
+		fmt.Print(test.Name, ": ")
+		if test.Repeat > 0 {
+			testSuiteData.TotalTests += test.Repeat
+			testSuiteData.FailedTests += repeatTest(testSuiteData.BinaryPath, test)
+			continue
+		}
+		if !runTest(testSuiteData.BinaryPath, test) {
 			testSuiteData.FailedTests += 1
-		} else { // test success
+		} else {
 			fmt.Printf(ANSI_GREEN+"\n", "OK")
 		}
 		testSuiteData.TotalTests += 1

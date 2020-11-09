@@ -8,6 +8,7 @@ import (
 	"log"
 	"math"
 	"os"
+	"os/exec"
 	"strings"
 )
 
@@ -72,4 +73,20 @@ func ArrOrStrToStr(itr interface{}) string {
 		s = itr.(string)
 	}
 	return s
+}
+
+func RunShellCommand(str string) error {
+	tmp := strings.Split(str, " ")
+	var cmd *exec.Cmd
+
+	if len(tmp) == 1 {
+		cmd = exec.Command(tmp[0])
+	} else {
+		cmd = exec.Command(tmp[0], strings.Join(tmp[1:], " "))
+	}
+	err := cmd.Run()
+	if err != nil {
+		return err
+	}
+	return nil
 }

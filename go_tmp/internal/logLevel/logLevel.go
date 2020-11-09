@@ -14,6 +14,6 @@ var LOG_LEVEL = NORMAL
 
 func PrintDebug(format string, a ...interface{}) {
 	if LOG_LEVEL == DEBUG {
-		fmt.Printf(format, a)
+		fmt.Printf(format, a...)
 	}
 }

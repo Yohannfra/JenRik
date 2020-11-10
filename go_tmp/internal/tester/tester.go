@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"github.com/Yohannfra/JenRik/internal/testData"
 	"github.com/Yohannfra/JenRik/internal/utils"
+	"log"
 	"os"
+	"time"
 	"os/exec"
 	"strings"
 )
@@ -27,6 +29,7 @@ type ShellCommandData struct {
 	exitStatus int
 	stdout     string
 	stderr     string
+	timeout    bool
 }
 
 func printSummary(testSuiteData *TestSuiteData) {
@@ -35,7 +38,28 @@ func printSummary(testSuiteData *TestSuiteData) {
 	fmt.Printf("%d : "+ANSI_RED+"\n", testSuiteData.FailedTests, "KO")
 }
 
-func runCmd(command string) ShellCommandData {
+func runWithTimeout(cmd *exec.Cmd, timeout_time int) (bool, error) {
+	done := make(chan error)
+
+	go func() {
+		done <- cmd.Run()
+	}()
+
+	timeout := time.After(1 * time.Second)
+
+	select {
+	case <-timeout:
+		err := cmd.Process.Kill()
+		if err != nil {
+			log.Fatal("Error, could not kill timout process")
+		}
+		return true, nil
+	case err := <-done:
+		return false, err
+	}
+}
+
+func runCmd(command string, env map[string]string, timeout_time int) ShellCommandData {
 	tmp := strings.Split(command, " ")
 	var cmd *exec.Cmd
 	var data ShellCommandData
@@ -48,11 +72,24 @@ func runCmd(command string) ShellCommandData {
 		cmd = exec.Command(tmp[0], strings.Join(tmp[1:], " "))
 	}
 
+	for key, value := range env {
+		cmd.Env = append(cmd.Env, key+"="+value)
+	}
+
 	cmd.Stdout = &stdout
 	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if err != nil {
-		data.exitStatus = err.(*exec.ExitError).ExitCode()
+	if timeout_time > 0 {
+		res, err := runWithTimeout(cmd, timeout_time)
+		data.timeout = res
+		if err != nil {
+			data.exitStatus = err.(*exec.ExitError).ExitCode()
+		}
+	} else {
+		data.timeout = false
+		err := cmd.Run()
+		if err != nil {
+			data.exitStatus = err.(*exec.ExitError).ExitCode()
+		}
 	}
 	data.stderr = string(stderr.Bytes())
 	data.stdout = string(stdout.Bytes())
@@ -67,6 +104,11 @@ func printTestFail(format string, a ...interface{}) bool {
 }
 
 func checkTestResult(test *testData.Test, testRes *ShellCommandData) bool {
+	// timeout
+	if testRes.timeout == true {
+		return printTestFail("Test timed out after  %d seconds\n", test.Timeout)
+	}
+
 	// exit status
 	if test.Status != testRes.exitStatus {
 		return printTestFail("Invalid exit status, expected %d but got %d\n", test.Status, testRes.exitStatus)
@@ -100,7 +142,7 @@ func runTest(binaryPath string, test *testData.Test) bool {
 			fmt.Println("Pre command error: ", err)
 		}
 	}
-	testResult := runCmd(binaryPath + " " + strings.Join(args, " "))
+	testResult := runCmd(binaryPath+" "+strings.Join(args, " "), test.Env, test.Timeout)
 	if test.Post != "" {
 		err := utils.RunShellCommand(test.Post)
 		if err != nil {

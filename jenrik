@@ -9,7 +9,7 @@ from colored import stylize
 import shlex
 import time
 
-JENRIK_VERSION = "1.09"
+JENRIK_VERSION = "1.10"
 
 TESTS_KEYS = [
     {'name' : 'args', 'type': [list]},
@@ -37,7 +37,8 @@ INCOMPATIBLES_KEYS = [('stdout', 'stdout_file'),
                       ('stderr', 'stderr_file'),
                       ('stdin', 'stdin_file')]
 
-QUIET_MODE = False
+# 0 Normal | 1 Quiet | 2 Super Quiet
+QUIET_LEVEL = 0
 
 def print_help(binary_name):
     """ Print a basic help showing how to use Jenerik """
@@ -45,7 +46,8 @@ def print_help(binary_name):
     print("\tinit\t\tcreate a basic test file for the given binary")
     print("\t--version\tprint version information and exit")
     print("\t--help\tprint this help and exit")
-    print("\t--quiet, -q\trun in quiet mode (doesn't show the diffs)")
+    print("\t-q\trun in quiet mode (doesn't show the diffs)")
+    print("\t-qq\trun in super quiet mode (just print the file name and OK/KO)")
 
 def get_file_content(fp):
     """ open a file and return its content """
@@ -174,6 +176,8 @@ class Tester:
 
     def print_test_sucess(self):
         """ print a message if test success """
+        if QUIET_LEVEL == 2:
+            return
         if self.test_should_fail == 0:
             return self.print_test_failed("Test should have failed")
         print(stylize('OK', colored.fg('green')))
@@ -181,6 +185,8 @@ class Tester:
 
     def print_test_failed(self, e):
         """ print a message if test fails """
+        if QUIET_LEVEL == 2:
+            return
         if self.test_should_fail == 1:
             return self.print_test_sucess()
         self.count_failed_tests += 1
@@ -189,7 +195,7 @@ class Tester:
 
 
     def print_diff(self, t1, t2):
-        if QUIET_MODE:
+        if QUIET_LEVEL > 0:
             return
         len1 = len(t1)
         len2 = len(t2)
@@ -320,15 +326,22 @@ class Tester:
         if 'post' in values:
             self.run_pre_post_command(values['post'])
         if 'repeat' in values and values['repeat'] - repeat_count > 0:
-            print(f" - Repeat {repeat_count + 1} {test_name}: " , end="")
+            if QUIET_LEVEL != 2:
+                print(f" - Repeat {repeat_count + 1} {test_name}: " , end="")
             self.run_test(values, test_name, repeat_count + 1)
 
     def print_summary(self):
         """ print a summary of the tests results """
-        count_success = self.count_tests - self.count_failed_tests
-        print(f"\nSummary {self.binary_path}: {self.count_tests} tests ran")
-        print(f"{count_success} : {stylize('OK', colored.fg('green'))}")
-        print(f"{self.count_failed_tests} : {stylize('KO', colored.fg('red'))}")
+        if QUIET_LEVEL == 2:
+            if self.count_failed_tests > 0:
+                print(f"{self.binary_path}: {stylize('KO', colored.fg('red'))}")
+            else:
+                print(f"{self.binary_path}: {stylize('OK', colored.fg('green'))}")
+        else:
+            count_success = self.count_tests - self.count_failed_tests
+            print(f"\nSummary {self.binary_path}: {self.count_tests} tests ran")
+            print(f"{count_success} : {stylize('OK', colored.fg('green'))}")
+            print(f"{self.count_failed_tests} : {stylize('KO', colored.fg('red'))}")
 
     def launch(self):
         """ launch the tests on the test suite """
@@ -336,7 +349,8 @@ class Tester:
             self.test_should_fail = -1
             if 'should_fail' in self.test_suite[test].keys():
                 self.test_should_fail = self.test_suite[test]['should_fail']
-            print(f"{test} : ", end='')
+            if QUIET_LEVEL != 2:
+                print(f"{test} : ", end='')
             self.run_test(self.test_suite[test], test, 0)
         self.print_summary()
         return self.count_failed_tests
@@ -353,11 +367,17 @@ def start_jenrik(fp):
         exit(tester.launch())
 
 def main(argc, argv):
-    global QUIET_MODE
-    if "-q" in argv or "--quiet" in argv:
-        QUIET_MODE = True
-        argv.remove("-q" if "-q" in argv else "--quiet")
+    global QUIET_LEVEL
+
+    if "-q" in argv:
+        QUIET_LEVEL = 1
+        argv.remove("-q")
         argc -= 1
+    if "-qq" in argv:
+        QUIET_LEVEL = 2
+        argv.remove("-qq")
+        argc -= 1
+
     if argc == 2 and argv[1] == '--version':
         return print(f"jenrik v{JENRIK_VERSION}")
     if argc == 2 and argv[1] == '--help':

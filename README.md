@@ -227,5 +227,5 @@ $ docker run image_jenrik:latest
 v 1.10
 ```
 
-## Licence
+## License
     This project is licensed under the terms of the MIT license.
